@@ -1,0 +1,14 @@
+{
+  "name": "henrysia",
+  "version": "1.0.0",
+  "description": "Visual piano waterfall visualizer and pattern player for Henry",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node build.js"
+  },
+  "keywords": ["visual-piano", "piano", "midi", "waterfall", "web-audio"],
+  "author": "",
+  "license": "MIT"
+}

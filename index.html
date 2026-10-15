@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Henrysia — Visual Piano & Pattern Waterfall</title>
+  <meta name="description" content="Visual piano waterfall visualizer and educational pattern player with realistic acoustic piano audio and MIDI generator for Henry.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300e5ff'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H6V5h2v8h2V5h2v8h2V5h2v12z'/></svg>">
+</head>
+<body>
+
+  <!-- Top Studio Header -->
+  <header class="studio-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H6V5h2v8h2V5h2v8h2V5h2v12z"/>
+          </svg>
+        </div>
+        <div class="brand-title">Henry<span>sia</span></div>
+      </div>
+
+      <div class="song-status-pill">
+        <div class="pulse-dot"></div>
+        <span id="currentSongDisplay">🌟 Henry's Grand Showcase</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Song & Pattern Dropdown -->
+      <select id="songSelect" class="select-control" title="Choose song or pattern"></select>
+
+      <!-- Custom Pattern Creator Modal Button -->
+      <button id="openCustomModalBtn" class="btn btn-primary" title="Create message or number pattern">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+        </svg>
+        <span>Make Pattern</span>
+      </button>
+
+      <!-- Import MIDI File Button -->
+      <label class="btn hide-mobile" title="Upload any .mid file">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+        </svg>
+        <span>Open .MID</span>
+        <input type="file" id="midiFileInput" accept=".mid,.midi" style="display: none;">
+      </label>
+
+      <!-- Download MIDI Button -->
+      <button id="downloadMidiBtn" class="btn hide-mobile" title="Download current song as .mid file">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        <span>Save .MID</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Waterfall Canvas Container -->
+  <main class="canvas-container">
+    <canvas id="waterfallCanvas"></canvas>
+    <div class="canvas-hint">⌨️ Press Space to Play • Drag keys or use QWERTY to play • Drop .mid files</div>
+  </main>
+
+  <!-- Bottom Floating Transport Dock -->
+  <footer class="transport-dock">
+    <div class="transport-left">
+      <!-- Play / Pause -->
+      <button id="playPauseBtn" class="play-pause-btn" title="Play or Pause (Spacebar)">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <span>Play</span>
+      </button>
+
+      <!-- Rewind to Start -->
+      <button id="rewindBtn" class="icon-btn" title="Rewind to beginning">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/>
+        </svg>
+      </button>
+
+      <!-- Speed Multiplier -->
+      <select id="speedSelect" class="select-control" title="Playback Speed">
+        <option value="0.5">0.5x (Slow)</option>
+        <option value="0.75">0.75x</option>
+        <option value="1.0" selected>1.0x (Normal)</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x (Fast)</option>
+      </select>
+    </div>
+
+    <!-- Scrubber Timeline -->
+    <div class="transport-center">
+      <div class="timeline-container">
+        <span id="timeCurrent" class="time-badge">0:00</span>
+        <input type="range" id="timelineSlider" class="range-slider" min="0" max="60" step="0.1" value="0">
+        <span id="timeTotal" class="time-badge">0:00</span>
+      </div>
+    </div>
+
+    <!-- Right Settings & Volume -->
+    <div class="transport-right">
+      <!-- Theme Selector -->
+      <select id="themeSelect" class="select-control hide-mobile" title="Visual Colors">
+        <option value="classic" selected>Classic Emerald & Sapphire</option>
+        <option value="rainbow">Rainbow Spectrum</option>
+        <option value="neon">Cyberpunk Neon</option>
+        <option value="gold">Golden Royalty</option>
+      </select>
+
+      <!-- Keyboard Range Selector -->
+      <select id="rangeSelect" class="select-control hide-mobile" title="Keyboard Key Range">
+        <option value="88" selected>88 Keys (Full Grand)</option>
+        <option value="61">61 Keys</option>
+        <option value="49">49 Keys</option>
+        <option value="auto">Auto-Fit to Song</option>
+      </select>
+
+      <!-- Sound Engine Selector -->
+      <select id="soundSelect" class="select-control hide-mobile" title="Piano Sound Engine">
+        <option value="grand" selected>Acoustic Grand</option>
+        <option value="warm">Warm Studio</option>
+        <option value="electric">Electric Keys</option>
+        <option value="bright">Bright Piano</option>
+      </select>
+
+      <!-- Labels Selector -->
+      <select id="labelsSelect" class="select-control hide-mobile" title="Key Labels">
+        <option value="letter" selected>Labels: C4, D4</option>
+        <option value="solfege">Labels: Do, Re, Mi</option>
+        <option value="none">Labels: Off</option>
+      </select>
+
+      <!-- Volume -->
+      <div class="volume-wrapper">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--text-muted)">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        <input type="range" id="volumeSlider" class="range-slider volume-slider" min="0" max="1" step="0.05" value="0.85">
+      </div>
+    </div>
+  </footer>
+
+  <!-- Custom Pattern Creator Modal -->
+  <div id="customModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>
+          <span>✨</span>
+          <span>Create Waterfall Pattern</span>
+        </h2>
+        <button id="closeModalBtn" class="icon-btn" title="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+
+      <p class="modal-desc">
+        Type any name, message, or numbers to watch them cascade down like giant glowing visual piano notes onto Henry's piano!
+      </p>
+
+      <div class="form-group">
+        <label>Message or Numbers</label>
+        <input type="text" id="customTextInput" class="form-input" value="HENRY" maxlength="20" placeholder="e.g. HENRY or 12345">
+        <div class="quick-tags">
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HENRY'">HENRY</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='12345'">1 2 3 4 5</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY BIRTHDAY'">HAPPY BIRTHDAY</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='SUPERSTAR'">SUPERSTAR</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='ABC'">ABC</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Display Layout</label>
+        <select id="customModeSelect" class="select-control">
+          <option value="banner" selected>Wide Banner (All letters across piano simultaneously)</option>
+          <option value="sequential">Sequential (One big letter at a time)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Musical Harmony</label>
+        <select id="customScaleSelect" class="select-control">
+          <option value="pentatonic" selected>Celestial Pentatonic Bells (Melodic & Chime-like)</option>
+          <option value="major">Joyful Major Scale</option>
+          <option value="chime">Arpeggiated Glass Chimes</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button id="downloadCustomMidiBtn" class="btn" title="Export this pattern to .mid file">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+          </svg>
+          <span>Download .MID</span>
+        </button>
+        <button id="applyCustomPatternBtn" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <span>Play in Henrysia</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JavaScript Libraries -->
+  <script src="js/audio.js?v=2"></script>
+  <script src="js/piano.js?v=4"></script>
+  <script src="js/waterfall.js?v=4"></script>
+  <script src="js/font-patterns.js?v=2"></script>
+  <script src="js/midi-parser.js?v=2"></script>
+  <script src="js/midi-writer.js?v=2"></script>
+  <script src="js/song-library.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
+</body>
+</html>

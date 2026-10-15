@@ -1,0 +1,12 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "mimeTypes": {
+    ".mid": "audio/midi",
+    ".midi": "audio/midi"
+  },
+  "globalHeaders": {
+    "Cache-Control": "public, max-age=3600"
+  }
+}
