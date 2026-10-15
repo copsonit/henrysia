@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Henrysia — Visual Piano & Pattern Waterfall</title>
   <meta name="description" content="Visual piano waterfall visualizer and educational pattern player with realistic acoustic piano audio and MIDI generator for Henry.">
   <link rel="stylesheet" href="css/style.css">
@@ -56,6 +56,13 @@
         </svg>
         <span>Save .MID</span>
       </button>
+
+      <!-- Fullscreen Toggle Button -->
+      <button id="fullscreenBtn" class="icon-btn" title="Toggle Fullscreen for Tablet/Mobile">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -104,36 +111,39 @@
 
     <!-- Right Settings & Volume -->
     <div class="transport-right">
-      <!-- Theme Selector -->
-      <select id="themeSelect" class="select-control hide-mobile" title="Visual Colors">
-        <option value="classic" selected>Classic Emerald & Sapphire</option>
-        <option value="rainbow">Rainbow Spectrum</option>
-        <option value="neon">Cyberpunk Neon</option>
-        <option value="gold">Golden Royalty</option>
-      </select>
+      <!-- Desktop Direct Selectors (hidden on tablets/mobile) -->
+      <div class="desktop-selectors">
+        <!-- Theme Selector -->
+        <select id="themeSelect" class="select-control" title="Visual Colors">
+          <option value="classic" selected>Classic Emerald & Sapphire</option>
+          <option value="rainbow">Rainbow Spectrum</option>
+          <option value="neon">Cyberpunk Neon</option>
+          <option value="gold">Golden Royalty</option>
+        </select>
 
-      <!-- Keyboard Range Selector -->
-      <select id="rangeSelect" class="select-control hide-mobile" title="Keyboard Key Range">
-        <option value="88" selected>88 Keys (Full Grand)</option>
-        <option value="61">61 Keys</option>
-        <option value="49">49 Keys</option>
-        <option value="auto">Auto-Fit to Song</option>
-      </select>
+        <!-- Keyboard Range Selector -->
+        <select id="rangeSelect" class="select-control" title="Keyboard Key Range">
+          <option value="88" selected>88 Keys (Full Grand)</option>
+          <option value="61">61 Keys</option>
+          <option value="49">49 Keys</option>
+          <option value="auto">Auto-Fit to Song</option>
+        </select>
 
-      <!-- Sound Engine Selector -->
-      <select id="soundSelect" class="select-control hide-mobile" title="Piano Sound Engine">
-        <option value="grand" selected>Acoustic Grand</option>
-        <option value="warm">Warm Studio</option>
-        <option value="electric">Electric Keys</option>
-        <option value="bright">Bright Piano</option>
-      </select>
+        <!-- Sound Engine Selector -->
+        <select id="soundSelect" class="select-control" title="Piano Sound Engine">
+          <option value="grand" selected>Acoustic Grand</option>
+          <option value="warm">Warm Studio</option>
+          <option value="electric">Electric Keys</option>
+          <option value="bright">Bright Piano</option>
+        </select>
 
-      <!-- Labels Selector -->
-      <select id="labelsSelect" class="select-control hide-mobile" title="Key Labels">
-        <option value="letter" selected>Labels: C4, D4</option>
-        <option value="solfege">Labels: Do, Re, Mi</option>
-        <option value="none">Labels: Off</option>
-      </select>
+        <!-- Labels Selector -->
+        <select id="labelsSelect" class="select-control" title="Key Labels">
+          <option value="letter" selected>Labels: C4, D4</option>
+          <option value="solfege">Labels: Do, Re, Mi</option>
+          <option value="none">Labels: Off</option>
+        </select>
+      </div>
 
       <!-- Volume -->
       <div class="volume-wrapper">
@@ -142,6 +152,13 @@
         </svg>
         <input type="range" id="volumeSlider" class="range-slider volume-slider" min="0" max="1" step="0.05" value="0.85">
       </div>
+
+      <!-- Settings Drawer Button (always visible on mobile/tablet) -->
+      <button id="settingsBtn" class="icon-btn settings-btn" title="Settings & Options">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+      </button>
     </div>
   </footer>
 
@@ -210,14 +227,91 @@
     </div>
   </div>
 
+  <!-- Settings & Customization Modal (Tablet & Mobile Optimized) -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>
+          <span>⚙️</span>
+          <span>Piano & Visual Settings</span>
+        </h2>
+        <button id="closeSettingsModalBtn" class="icon-btn" title="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label>🎨 Visual Waterfall Theme</label>
+        <select id="modalThemeSelect" class="select-control">
+          <option value="classic" selected>Classic Emerald & Sapphire</option>
+          <option value="rainbow">Rainbow Spectrum</option>
+          <option value="neon">Cyberpunk Neon</option>
+          <option value="gold">Golden Royalty</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>🎹 Keyboard Key Range</label>
+        <select id="modalRangeSelect" class="select-control">
+          <option value="88" selected>88 Keys (Full Grand Piano)</option>
+          <option value="61">61 Keys (Wider Touch Keys)</option>
+          <option value="49">49 Keys (Big Touch Keys for Kids)</option>
+          <option value="auto">Auto-Fit to Current Song</option>
+        </select>
+        <div class="field-hint">Tip on tablets: 61 Keys or Auto-Fit makes keys wider and easier to tap!</div>
+      </div>
+
+      <div class="form-group">
+        <label>🔊 Piano Sound Engine</label>
+        <select id="modalSoundSelect" class="select-control">
+          <option value="grand" selected>Acoustic Grand (Realistic Concert Piano)</option>
+          <option value="warm">Warm Studio Piano</option>
+          <option value="electric">Electric Keys</option>
+          <option value="bright">Bright Piano</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>🏷️ Key Labels</label>
+        <select id="modalLabelsSelect" class="select-control">
+          <option value="letter" selected>Note Names: C4, D4, E4</option>
+          <option value="solfege">Solfège: Do, Re, Mi</option>
+          <option value="none">Labels Off</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>⏱️ Playback Speed</label>
+        <select id="modalSpeedSelect" class="select-control">
+          <option value="0.5">0.5x (Super Slow for Learning)</option>
+          <option value="0.75">0.75x (Gentle Practice)</option>
+          <option value="1.0" selected>1.0x (Normal Speed)</option>
+          <option value="1.25">1.25x (Fast)</option>
+          <option value="1.5">1.5x (Double Speed)</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button id="modalFullscreenBtn" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+          </svg>
+          <span>Toggle Fullscreen</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Core JavaScript Libraries -->
-  <script src="js/audio.js?v=2"></script>
-  <script src="js/piano.js?v=4"></script>
-  <script src="js/waterfall.js?v=4"></script>
-  <script src="js/font-patterns.js?v=2"></script>
-  <script src="js/midi-parser.js?v=2"></script>
-  <script src="js/midi-writer.js?v=2"></script>
-  <script src="js/song-library.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/audio.js?v=5"></script>
+  <script src="js/piano.js?v=5"></script>
+  <script src="js/waterfall.js?v=5"></script>
+  <script src="js/font-patterns.js?v=5"></script>
+  <script src="js/midi-parser.js?v=5"></script>
+  <script src="js/midi-writer.js?v=5"></script>
+  <script src="js/song-library.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>

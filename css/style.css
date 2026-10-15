@@ -30,12 +30,20 @@ body {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-main);
-  height: 100vh;
-  width: 100vw;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -243,16 +251,23 @@ body {
    Bottom Floating Transport Dock
    ========================================================================== */
 .transport-dock {
-  height: 64px;
-  min-height: 64px;
+  height: 56px;
+  min-height: 56px;
   background: var(--panel-bg);
   border-top: 1px solid var(--panel-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 16px;
+  padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
   z-index: 20;
   backdrop-filter: blur(16px);
+}
+
+.desktop-selectors {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .transport-left, .transport-center, .transport-right {
@@ -490,25 +505,111 @@ body {
   margin-top: 8px;
 }
 
+.field-hint {
+  font-size: 0.76rem;
+  color: var(--accent-cyan);
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
 /* ==========================================================================
-   Responsive Adaptations
+   Responsive & Tablet Adaptations
    ========================================================================== */
+@media (max-width: 1150px) {
+  .desktop-selectors {
+    display: none !important;
+  }
+}
+
 @media (max-width: 900px) {
   .studio-header {
     padding: 0 10px;
-    height: 50px;
-    min-height: 50px;
+    height: 48px;
+    min-height: 48px;
   }
   .brand-title {
     display: none;
   }
-  .header-controls .hide-mobile {
+  .song-status-pill {
     display: none;
+  }
+  .header-controls .hide-mobile {
+    display: none !important;
   }
   .transport-dock {
+    height: 52px;
+    min-height: 52px;
     padding: 0 10px;
+    gap: 8px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   }
-  .transport-right .hide-mobile {
+  .transport-left, .transport-center, .transport-right {
+    gap: 8px;
+  }
+  .transport-center {
+    padding: 0 8px;
+  }
+  .play-pause-btn {
+    padding: 6px 12px;
+    font-size: 0.88rem;
+  }
+  .play-pause-btn span {
     display: none;
+  }
+  .timeline-container {
+    gap: 6px;
+  }
+  .time-badge {
+    font-size: 0.72rem;
+    min-width: 28px;
+  }
+  .volume-slider {
+    width: 55px;
+  }
+}
+
+@media (max-width: 600px) {
+  .volume-wrapper {
+    display: none !important;
+  }
+  .header-controls .btn span {
+    display: none;
+  }
+  .header-controls .btn {
+    padding: 6px 10px;
+  }
+  #songSelect {
+    max-width: 140px;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-height: 650px) {
+  .studio-header {
+    height: 42px;
+    min-height: 42px;
+    padding: 0 8px;
+  }
+  .brand-logo {
+    font-size: 1.1rem;
+  }
+  .brand-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .transport-dock {
+    height: 46px;
+    min-height: 46px;
+    padding: 0 8px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  }
+  .btn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+  .select-control {
+    padding: 4px 8px;
+    font-size: 0.8rem;
   }
 }

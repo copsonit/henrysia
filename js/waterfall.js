@@ -46,25 +46,39 @@ class WaterfallEngine {
   initResize() {
     const handleResize = () => {
       const rect = this.canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      this.canvas.width = rect.width * dpr;
-      this.canvas.height = rect.height * dpr;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.canvas.width = Math.round(rect.width * dpr);
+      this.canvas.height = Math.round(rect.height * dpr);
       this.width = this.canvas.width;
       this.height = this.canvas.height;
       this.ctx.resetTransform();
       this.ctx.scale(dpr, dpr);
 
-      // Adaptive keyboard height
       this.cssWidth = rect.width;
       this.cssHeight = rect.height;
-      this.keyboardHeight = Math.min(180, Math.max(100, rect.height * 0.24));
+
+      // Adaptive keyboard height for mobile & tablet
+      const isPortrait = rect.height > rect.width;
+      if (isPortrait) {
+        this.keyboardHeight = Math.min(170, Math.max(110, Math.round(rect.height * 0.22)));
+      } else if (rect.height < 520) {
+        this.keyboardHeight = Math.min(130, Math.max(85, Math.round(rect.height * 0.30)));
+      } else if (rect.height < 760) {
+        this.keyboardHeight = Math.min(150, Math.max(95, Math.round(rect.height * 0.27)));
+      } else {
+        this.keyboardHeight = Math.min(180, Math.max(110, Math.round(rect.height * 0.24)));
+      }
 
       this.piano.updateLayout(this.cssWidth, this.cssHeight, this.keyboardHeight);
     };
 
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => setTimeout(handleResize, 150));
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
     // Initial call
-    setTimeout(handleResize, 10);
+    setTimeout(handleResize, 20);
   }
 
   setTheme(themeName) {

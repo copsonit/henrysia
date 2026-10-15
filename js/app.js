@@ -51,6 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const applyCustomPatternBtn = document.getElementById('applyCustomPatternBtn');
   const downloadCustomMidiBtn = document.getElementById('downloadCustomMidiBtn');
 
+  // Settings Modal Elements (Tablet & Mobile)
+  const settingsModal = document.getElementById('settingsModal');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+  const modalThemeSelect = document.getElementById('modalThemeSelect');
+  const modalRangeSelect = document.getElementById('modalRangeSelect');
+  const modalSoundSelect = document.getElementById('modalSoundSelect');
+  const modalLabelsSelect = document.getElementById('modalLabelsSelect');
+  const modalSpeedSelect = document.getElementById('modalSpeedSelect');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  const modalFullscreenBtn = document.getElementById('modalFullscreenBtn');
+
   // Current Song Metadata
   let currentSongTitle = "Henry's Grand Showcase";
   let currentNotes = [];
@@ -182,6 +194,84 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.setVolume(parseFloat(e.target.value));
   });
 
+  // Fullscreen Handlers
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+  }
+
+  if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
+  if (modalFullscreenBtn) modalFullscreenBtn.addEventListener('click', toggleFullscreen);
+
+  // Settings Modal Toggle & Synchronization
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      if (modalThemeSelect) modalThemeSelect.value = themeSelect.value;
+      if (modalRangeSelect) modalRangeSelect.value = rangeSelect.value;
+      if (modalSoundSelect) modalSoundSelect.value = soundSelect.value;
+      if (modalLabelsSelect) modalLabelsSelect.value = labelsSelect.value;
+      if (modalSpeedSelect) modalSpeedSelect.value = speedSelect.value;
+      settingsModal.classList.add('active');
+    });
+  }
+
+  if (closeSettingsModalBtn) {
+    closeSettingsModalBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('active');
+    });
+  }
+
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove('active');
+      }
+    });
+  }
+
+  if (modalThemeSelect) {
+    modalThemeSelect.addEventListener('change', (e) => {
+      themeSelect.value = e.target.value;
+      waterfall.setTheme(e.target.value);
+    });
+  }
+  if (modalRangeSelect) {
+    modalRangeSelect.addEventListener('change', (e) => {
+      rangeSelect.value = e.target.value;
+      piano.setKeyRange(e.target.value, currentNotes);
+    });
+  }
+  if (modalSoundSelect) {
+    modalSoundSelect.addEventListener('change', (e) => {
+      soundSelect.value = e.target.value;
+      audio.setSoundMode(e.target.value);
+    });
+  }
+  if (modalLabelsSelect) {
+    modalLabelsSelect.addEventListener('change', (e) => {
+      labelsSelect.value = e.target.value;
+      piano.labelMode = e.target.value;
+    });
+  }
+  if (modalSpeedSelect) {
+    modalSpeedSelect.addEventListener('change', (e) => {
+      speedSelect.value = e.target.value;
+      waterfall.playbackRate = parseFloat(e.target.value);
+    });
+  }
+
   // Download Current Song / Pattern as MIDI
   downloadMidiBtn.addEventListener('click', () => {
     if (!currentNotes || currentNotes.length === 0) {
@@ -296,22 +386,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. Interactive Piano Touch & Mouse (Glissando)
+  // 4. Interactive Piano Touch & Mouse (Multi-Touch for Tablets & iPads)
+  const activeTouchNotes = new Map(); // touchId -> midiNote
   let activeMouseNote = null;
 
-  function getCanvasCoords(e) {
+  function getTouchCanvasCoords(touch) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
     };
   }
 
-  function handlePointerDown(e) {
+  function getMouseCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+
+  // Mouse Playing (Desktop)
+  function handleMouseDown(e) {
     audio.ensureContext();
-    const { x, y } = getCanvasCoords(e);
+    const { x, y } = getMouseCanvasCoords(e);
     const key = piano.getKeyAt(x, y, waterfall.cssWidth, waterfall.cssHeight, waterfall.keyboardHeight);
     if (key) {
       activeMouseNote = key.midi;
@@ -321,9 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function handlePointerMove(e) {
-    if (activeMouseNote === null && !e.buttons && !e.touches) return;
-    const { x, y } = getCanvasCoords(e);
+  function handleMouseMove(e) {
+    if (activeMouseNote === null && !e.buttons) return;
+    const { x, y } = getMouseCanvasCoords(e);
     const key = piano.getKeyAt(x, y, waterfall.cssWidth, waterfall.cssHeight, waterfall.keyboardHeight);
     if (key && key.midi !== activeMouseNote) {
       if (activeMouseNote !== null) {
@@ -337,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function handlePointerUp() {
+  function handleMouseUp() {
     if (activeMouseNote !== null) {
       audio.stopNote(activeMouseNote);
       piano.setNoteState(activeMouseNote, false);
@@ -345,21 +443,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  canvas.addEventListener('mousedown', handlePointerDown);
-  window.addEventListener('mousemove', handlePointerMove);
-  window.addEventListener('mouseup', handlePointerUp);
+  canvas.addEventListener('mousedown', handleMouseDown);
+  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('mouseup', handleMouseUp);
 
+  // Multi-Touch Playing (Tablets & Mobile - All Fingers Polyphonic!)
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    handlePointerDown(e);
+    audio.ensureContext();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const { x, y } = getTouchCanvasCoords(touch);
+      const key = piano.getKeyAt(x, y, waterfall.cssWidth, waterfall.cssHeight, waterfall.keyboardHeight);
+      if (key) {
+        activeTouchNotes.set(touch.identifier, key.midi);
+        audio.playNote(key.midi, 0.9);
+        piano.setNoteState(key.midi, true, { color: '#00e5ff', isUser: true });
+        waterfall.spawnHitParticles(key.x, waterfall.cssHeight - waterfall.keyboardHeight, key.width, '#00e5ff');
+      }
+    }
   }, { passive: false });
 
   canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    handlePointerMove(e);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const { x, y } = getTouchCanvasCoords(touch);
+      const key = piano.getKeyAt(x, y, waterfall.cssWidth, waterfall.cssHeight, waterfall.keyboardHeight);
+      const currentNote = activeTouchNotes.get(touch.identifier);
+
+      if (key && key.midi !== currentNote) {
+        if (currentNote !== undefined) {
+          audio.stopNote(currentNote);
+          piano.setNoteState(currentNote, false);
+        }
+        activeTouchNotes.set(touch.identifier, key.midi);
+        audio.playNote(key.midi, 0.9);
+        piano.setNoteState(key.midi, true, { color: '#00e5ff', isUser: true });
+        waterfall.spawnHitParticles(key.x, waterfall.cssHeight - waterfall.keyboardHeight, key.width, '#00e5ff');
+      } else if (!key && currentNote !== undefined) {
+        audio.stopNote(currentNote);
+        piano.setNoteState(currentNote, false);
+        activeTouchNotes.delete(touch.identifier);
+      }
+    }
   }, { passive: false });
 
-  window.addEventListener('touchend', handlePointerUp);
+  function handleTouchEnd(e) {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const note = activeTouchNotes.get(touch.identifier);
+      if (note !== undefined) {
+        audio.stopNote(note);
+        piano.setNoteState(note, false);
+        activeTouchNotes.delete(touch.identifier);
+      }
+    }
+  }
+
+  window.addEventListener('touchend', handleTouchEnd);
+  window.addEventListener('touchcancel', handleTouchEnd);
 
   // 5. Computer Keyboard QWERTY Playing
   const KEY_NOTE_MAP = {

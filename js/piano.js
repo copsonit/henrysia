@@ -398,6 +398,7 @@ class PianoKeyboard {
 
   renderKeyLabel(ctx, key, isBlack, active) {
     if (this.labelMode === 'none') return;
+    if (!isBlack && key.width < 12 && key.name !== 'C') return; // Skip non-C labels if keys are extremely narrow
 
     let text = '';
     if (this.labelMode === 'solfege') {
@@ -407,20 +408,23 @@ class PianoKeyboard {
     } else {
       // Show note name, with octave number primarily on C notes (C3, C4, C5)
       text = key.name;
-      if (key.name === 'C' || key.width > 28) {
+      if (key.name === 'C' || key.width > 24) {
         text = key.fullName;
       }
     }
 
-    ctx.font = isBlack ? 'bold 9px sans-serif' : 'bold 11px sans-serif';
+    const fontSize = isBlack 
+      ? Math.max(7, Math.min(11, Math.round(key.width * 0.55)))
+      : Math.max(8, Math.min(13, Math.round(key.width * 0.46)));
+    ctx.font = `bold ${fontSize}px 'Outfit', -apple-system, sans-serif`;
     ctx.textAlign = 'center';
 
     if (isBlack) {
       ctx.fillStyle = active ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
-      ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 8);
+      ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 6);
     } else {
-      ctx.fillStyle = active ? '#000000' : (key.name === 'C' ? '#1565c0' : '#607d8b');
-      ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 12);
+      ctx.fillStyle = active ? '#000000' : (key.name === 'C' ? '#00e5ff' : '#6c7a89');
+      ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 8);
     }
   }
 }
