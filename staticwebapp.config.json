@@ -1,6 +1,7 @@
 {
   "navigationFallback": {
-    "rewrite": "/index.html"
+    "rewrite": "/index.html",
+    "exclude": ["/css/*", "/js/*", "*.{png,jpg,jpeg,gif,svg,ico,mid,midi}"]
   },
   "mimeTypes": {
     ".mid": "audio/midi",
