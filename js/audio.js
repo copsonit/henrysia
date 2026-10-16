@@ -15,8 +15,25 @@ class PianoAudioEngine {
     this.isMuted = false;
     this.volume = 0.85;
     this.soundMode = 'grand'; // 'grand', 'warm', 'electric', 'bright'
+    this.fidelity = 'medium'; // 'low', 'medium', 'high'
     this.sampleBuffers = new Map();
     this.samplesLoaded = false;
+  }
+
+  setFidelity(fidelity = 'medium') {
+    this.fidelity = fidelity;
+    if (this.wetNode && this.ctx) {
+      if (fidelity === 'low') {
+        this.wetNode.gain.setValueAtTime(0, this.ctx.currentTime);
+        if (this.dryNode) this.dryNode.gain.setValueAtTime(0.9, this.ctx.currentTime);
+      } else if (fidelity === 'medium') {
+        this.wetNode.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        if (this.dryNode) this.dryNode.gain.setValueAtTime(0.8, this.ctx.currentTime);
+      } else {
+        this.wetNode.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        if (this.dryNode) this.dryNode.gain.setValueAtTime(0.75, this.ctx.currentTime);
+      }
+    }
   }
 
   init() {
@@ -39,10 +56,15 @@ class PianoAudioEngine {
     // Reverb send/return
     this.dryNode = this.ctx.createGain();
     this.wetNode = this.ctx.createGain();
-    this.dryNode.gain.setValueAtTime(0.75, this.ctx.currentTime);
-    this.wetNode.gain.setValueAtTime(0.35, this.ctx.currentTime);
+    const wetLevel = this.fidelity === 'low' ? 0 : (this.fidelity === 'medium' ? 0.18 : 0.35);
+    const dryLevel = this.fidelity === 'low' ? 0.9 : (this.fidelity === 'medium' ? 0.8 : 0.75);
+    this.dryNode.gain.setValueAtTime(dryLevel, this.ctx.currentTime);
+    this.wetNode.gain.setValueAtTime(wetLevel, this.ctx.currentTime);
 
-    this.reverbNode = this.createConvolverReverb(2.4, 1.8);
+    // Only create ConvolverReverb if not in low-fidelity mode to save RAM & CPU on budget tablets
+    if (this.fidelity !== 'low') {
+      this.reverbNode = this.createConvolverReverb(2.2, 1.8);
+    }
 
     // Routing
     this.dryNode.connect(this.compressor);
@@ -79,23 +101,25 @@ class PianoAudioEngine {
    */
   createConvolverReverb(duration = 2.2, decay = 2.0) {
     if (!this.ctx) return null;
-    const rate = this.ctx.sampleRate;
-    const length = rate * duration;
-    const impulse = this.ctx.createBuffer(2, length, rate);
-    const left = impulse.getChannelData(0);
-    const right = impulse.getChannelData(1);
+    try {
+      const rate = this.ctx.sampleRate;
+      const length = Math.floor(rate * duration);
+      const impulse = this.ctx.createBuffer(2, length, rate);
+      const left = impulse.getChannelData(0);
+      const right = impulse.getChannelData(1);
 
-    for (let i = 0; i < length; i++) {
-      const t = i / rate;
-      const n = (Math.random() * 2 - 1);
-      const envelope = Math.pow(1 - i / length, decay);
-      left[i] = n * envelope;
-      right[i] = (Math.random() * 2 - 1) * envelope;
+      for (let i = 0; i < length; i++) {
+        const envelope = Math.pow(1 - i / length, decay);
+        left[i] = (Math.random() * 2 - 1) * envelope;
+        right[i] = (Math.random() * 2 - 1) * envelope;
+      }
+
+      const convolver = this.ctx.createConvolver();
+      convolver.buffer = impulse;
+      return convolver;
+    } catch (e) {
+      return null;
     }
-
-    const convolver = this.ctx.createConvolver();
-    convolver.buffer = impulse;
-    return convolver;
   }
 
   /**
@@ -103,6 +127,30 @@ class PianoAudioEngine {
    */
   midiToFreq(midi) {
     return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  /**
+   * Enforce polyphony limits by terminating the oldest voice
+   */
+  enforcePolyphonyLimit() {
+    const maxVoices = this.fidelity === 'low' ? 12 : (this.fidelity === 'medium' ? 24 : 48);
+    let totalVoices = 0;
+    let oldestNote = null;
+    let oldestTime = Infinity;
+
+    for (const [note, voices] of this.activeVoices.entries()) {
+      totalVoices += voices.length;
+      voices.forEach(v => {
+        if (v.startTime < oldestTime) {
+          oldestTime = v.startTime;
+          oldestNote = note;
+        }
+      });
+    }
+
+    if (totalVoices >= maxVoices && oldestNote !== null) {
+      this.stopNote(oldestNote, 0.04);
+    }
   }
 
   /**
@@ -114,6 +162,7 @@ class PianoAudioEngine {
 
     // Cut previous instance of same note if hanging
     this.stopNote(midiNote, 0.05);
+    this.enforcePolyphonyLimit();
 
     const now = this.ctx.currentTime;
     const freq = this.midiToFreq(midiNote);
@@ -122,13 +171,98 @@ class PianoAudioEngine {
     // Voice container
     const voiceGain = this.ctx.createGain();
     voiceGain.connect(this.dryNode);
-    if (this.reverbNode) {
+    if (this.reverbNode && this.fidelity !== 'low') {
       voiceGain.connect(this.reverbNode);
     }
 
     const oscillators = [];
 
-    // Acoustic Piano Harmonic Profiles based on mode
+    // =========================================================================
+    // OPTIMIZED LOW-FIDELITY SYNTH (1 OSCILLATOR - PERFECT FOR BUDGET TABLETS)
+    // =========================================================================
+    if (this.fidelity === 'low') {
+      const osc = this.ctx.createOscillator();
+      // Triangle wave has rich odd harmonics that sound warm & percussive like piano
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      const targetGain = 0.38 * vel;
+      const decayTime = Math.min(1.8, Math.max(0.6, 2.2 * Math.pow(261.6 / Math.max(80, freq), 0.3)));
+
+      voiceGain.gain.setValueAtTime(0.0001, now);
+      voiceGain.gain.linearRampToValueAtTime(targetGain, now + 0.004); // 4ms attack
+      voiceGain.gain.exponentialRampToValueAtTime(0.0001, now + decayTime);
+
+      osc.connect(voiceGain);
+      osc.start(now);
+      osc.stop(now + decayTime + 0.05);
+      oscillators.push(osc);
+
+      if (!this.activeVoices.has(midiNote)) {
+        this.activeVoices.set(midiNote, []);
+      }
+      this.activeVoices.get(midiNote).push({
+        voiceGain,
+        oscillators,
+        startTime: now
+      });
+      return;
+    }
+
+    // =========================================================================
+    // OPTIMIZED MEDIUM-FIDELITY SYNTH (2 OSCILLATORS - BALANCED)
+    // =========================================================================
+    if (this.fidelity === 'medium') {
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(freq, now);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2, now); // 2nd harmonic overtone
+      osc2.detune.setValueAtTime(1.5, now);
+
+      const g1 = this.ctx.createGain();
+      const g2 = this.ctx.createGain();
+
+      const targetGain = 0.35 * vel;
+      const decayTime = Math.min(2.4, Math.max(0.7, 2.8 * Math.pow(261.6 / Math.max(80, freq), 0.35)));
+
+      g1.gain.setValueAtTime(0.0001, now);
+      g1.gain.linearRampToValueAtTime(targetGain * 0.75, now + 0.004);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + decayTime);
+
+      g2.gain.setValueAtTime(0.0001, now);
+      g2.gain.linearRampToValueAtTime(targetGain * 0.25, now + 0.004);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + decayTime * 0.7);
+
+      osc1.connect(g1);
+      osc2.connect(g2);
+      g1.connect(voiceGain);
+      g2.connect(voiceGain);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + decayTime + 0.05);
+      osc2.stop(now + decayTime + 0.05);
+
+      oscillators.push(osc1, osc2);
+
+      if (!this.activeVoices.has(midiNote)) {
+        this.activeVoices.set(midiNote, []);
+      }
+      this.activeVoices.get(midiNote).push({
+        voiceGain,
+        oscillators,
+        startTime: now
+      });
+      return;
+    }
+
+    // =========================================================================
+    // HIGH-FIDELITY SYNTH (MULTI-HARMONIC + HAMMER TRANSIENT)
+    // =========================================================================
     let partials;
     if (this.soundMode === 'warm') {
       partials = [
@@ -155,7 +289,6 @@ class PianoAudioEngine {
       ];
     } else {
       // 'grand' acoustic grand piano
-      // Inharmonicity factor for realistic acoustic piano strings
       const B = 0.00015 * Math.pow(freq / 261.6, 0.6);
       partials = [
         { mult: 1 * Math.sqrt(1 + B * 1), gain: 1.0, decay: 3.2 },
@@ -167,7 +300,6 @@ class PianoAudioEngine {
       ];
     }
 
-    // Lower notes ring out longer; higher notes decay faster
     const registerDecayFactor = Math.pow(261.6 / Math.max(80, freq), 0.35);
 
     partials.forEach((p, idx) => {
@@ -175,8 +307,6 @@ class PianoAudioEngine {
       const pGain = this.ctx.createGain();
 
       osc.type = p.type || (idx === 0 ? 'sine' : (idx === 1 ? 'triangle' : 'sine'));
-      
-      // Slight detune for physical string chorus (piano 3-string unisons)
       const detuneCents = (idx === 0 ? (Math.random() * 2 - 1) * 1.5 : (Math.random() * 4 - 2) * 2.5);
       osc.frequency.setValueAtTime(freq * p.mult, now);
       osc.detune.setValueAtTime(detuneCents, now);
@@ -184,10 +314,8 @@ class PianoAudioEngine {
       const targetGain = p.gain * vel * 0.4;
       const decayTime = p.decay * registerDecayFactor;
 
-      // Percussive strike attack (hammer hitting string)
       pGain.gain.setValueAtTime(0.0001, now);
-      pGain.gain.linearRampToValueAtTime(targetGain, now + 0.003); // 3ms attack
-      // Exponential decay to sustain
+      pGain.gain.linearRampToValueAtTime(targetGain, now + 0.003);
       pGain.gain.exponentialRampToValueAtTime(targetGain * 0.4, now + 0.15);
       pGain.gain.exponentialRampToValueAtTime(0.0001, now + decayTime);
 
@@ -201,7 +329,7 @@ class PianoAudioEngine {
 
     // Acoustic hammer knock / transient noise click
     try {
-      const hammerBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.02), this.ctx.sampleRate);
+      const hammerBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.015), this.ctx.sampleRate);
       const hammerData = hammerBuffer.getChannelData(0);
       for (let i = 0; i < hammerData.length; i++) {
         hammerData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (hammerData.length * 0.3));
@@ -215,17 +343,15 @@ class PianoAudioEngine {
       hammerFilter.Q.setValueAtTime(2.0, now);
 
       const hammerGain = this.ctx.createGain();
-      hammerGain.gain.setValueAtTime(0.15 * vel, now);
-      hammerGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+      hammerGain.gain.setValueAtTime(0.12 * vel, now);
+      hammerGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
 
       hammerSource.connect(hammerFilter);
       hammerFilter.connect(hammerGain);
       hammerGain.connect(voiceGain);
 
       hammerSource.start(now);
-    } catch (e) {
-      // Non-fatal if noise buffer fails
-    }
+    } catch (e) {}
 
     // Save active voice references
     if (!this.activeVoices.has(midiNote)) {

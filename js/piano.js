@@ -34,6 +34,7 @@ class PianoKeyboard {
     this.showLabels = true;
     this.labelMode = 'letter'; // 'letter' (C4), 'solfege' (Do4), 'none'
     this.keyRangePreset = '88'; // '88', '61', '49', 'auto'
+    this.fidelity = 'medium'; // 'low', 'medium', 'high'
     this.songMinMidi = 21;
     this.songMaxMidi = 108;
     this.lastWidth = 0;
@@ -53,6 +54,10 @@ class PianoKeyboard {
     this.keys = [];
     this.whiteKeyCount = 0;
     this.buildKeyMap();
+  }
+
+  setFidelity(fidelity = 'medium') {
+    this.fidelity = fidelity;
   }
 
   setKeyRange(preset, songNotes = null) {
@@ -273,6 +278,41 @@ class PianoKeyboard {
     const active = this.activeKeys.get(key.midi);
     const { x, y, width, height } = key;
 
+    // =========================================================================
+    // LOW FIDELITY FAST PATH (ZERO GRADIENT ALLOCATIONS, ZERO SHADOW BLUR)
+    // =========================================================================
+    if (this.fidelity === 'low') {
+      if (active) {
+        const activeColor = active.color || '#00e5ff';
+        ctx.fillStyle = activeColor;
+        ctx.fillRect(x + 0.5, y + 1, width - 1, height - 1);
+
+        // Top impact highlight
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + 1, y, width - 2, 3);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 1, width - 1, height - 1);
+      } else {
+        ctx.fillStyle = '#b4bdca';
+        ctx.fillRect(x + 0.5, y, width - 1, height);
+
+        // Right edge separator
+        ctx.fillStyle = '#555f6d';
+        ctx.fillRect(x + width - 1, y, 1, height);
+
+        // Bottom curved bevel
+        ctx.fillStyle = '#6e7a89';
+        ctx.fillRect(x + 1, y + height - 3, width - 2, 3);
+      }
+
+      if (this.showLabels) {
+        this.renderKeyLabel(ctx, key, false, active);
+      }
+      return;
+    }
+
     ctx.save();
 
     if (active) {
@@ -302,9 +342,11 @@ class PianoKeyboard {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(x + 1, y, width - 2, 4);
 
-      // Ambient neon bloom
-      ctx.shadowColor = activeColor;
-      ctx.shadowBlur = 14;
+      // Ambient neon bloom (only on High fidelity)
+      if (this.fidelity === 'high') {
+        ctx.shadowColor = activeColor;
+        ctx.shadowBlur = 14;
+      }
     } else {
       // Normal White Key: Sleek darker ivory/slate with high-contrast bevels
       const grad = ctx.createLinearGradient(x, y, x, y + height);
@@ -341,6 +383,34 @@ class PianoKeyboard {
     const active = this.activeKeys.get(key.midi);
     const { x, y, width, height } = key;
 
+    // =========================================================================
+    // LOW FIDELITY FAST PATH
+    // =========================================================================
+    if (this.fidelity === 'low') {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.fillRect(x - 1, y, width + 2, height + 3);
+
+      if (active) {
+        const activeColor = active.color || '#ff0077';
+        ctx.fillStyle = activeColor;
+        ctx.fillRect(x, y + 1, width, height - 1);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, y, width, 3);
+      } else {
+        ctx.fillStyle = '#14161b';
+        ctx.fillRect(x, y, width, height);
+
+        ctx.fillStyle = '#2d333f';
+        ctx.fillRect(x + 1, y, width - 2, 2);
+      }
+
+      if (this.showLabels) {
+        this.renderKeyLabel(ctx, key, true, active);
+      }
+      return;
+    }
+
     ctx.save();
 
     // Drop shadow beneath black key onto white keys
@@ -368,9 +438,11 @@ class PianoKeyboard {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(x, y, width, 4);
 
-      // Ambient neon bloom
-      ctx.shadowColor = activeColor;
-      ctx.shadowBlur = 16;
+      // Ambient neon bloom (only on High fidelity)
+      if (this.fidelity === 'high') {
+        ctx.shadowColor = activeColor;
+        ctx.shadowBlur = 16;
+      }
     } else {
       // Realistic 3D Obsidian Black Key (Matte Ebony with Bevel)
       const grad = ctx.createLinearGradient(x, y, x, y + height);

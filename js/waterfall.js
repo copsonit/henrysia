@@ -49,13 +49,47 @@ class WaterfallEngine {
       '#ec4899'  // Ghostly Pink
     ];
 
+    // Fidelity & Performance: 'low' (30Hz tablet), 'medium' (60Hz balanced), 'high' (ultra)
+    this.fidelity = 'medium';
+    this.targetFps = 60;
+    this.frameInterval = 1000 / 60;
+    this.lastFrameTimestamp = 0;
+
     this.initResize();
   }
 
+  setFidelity(fidelity = 'medium') {
+    this.fidelity = fidelity;
+    if (fidelity === 'low') {
+      this.targetFps = 30;
+      this.frameInterval = 1000 / 30;
+      this.particles = [];
+    } else if (fidelity === 'medium') {
+      this.targetFps = 60;
+      this.frameInterval = 1000 / 60;
+      if (this.particles.length > 25) this.particles.length = 25;
+    } else {
+      this.targetFps = 0; // Unclamped (runs at display refresh rate)
+      this.frameInterval = 0;
+    }
+
+    if (this.piano && typeof this.piano.setFidelity === 'function') {
+      this.piano.setFidelity(fidelity);
+    }
+
+    if (typeof this.handleResize === 'function') {
+      this.handleResize();
+    }
+  }
+
   initResize() {
-    const handleResize = () => {
+    this.handleResize = () => {
       const rect = this.canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let maxDpr = 2.0;
+      if (this.fidelity === 'low') maxDpr = 1.0;
+      else if (this.fidelity === 'medium') maxDpr = 1.25;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       this.canvas.width = Math.round(rect.width * dpr);
       this.canvas.height = Math.round(rect.height * dpr);
       this.width = this.canvas.width;
@@ -81,13 +115,13 @@ class WaterfallEngine {
       this.piano.updateLayout(this.cssWidth, this.cssHeight, this.keyboardHeight);
     };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => setTimeout(handleResize, 150));
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('orientationchange', () => setTimeout(this.handleResize, 150));
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('resize', this.handleResize);
     }
     // Initial call
-    setTimeout(handleResize, 20);
+    setTimeout(this.handleResize, 20);
   }
 
   setTheme(themeName) {
@@ -211,41 +245,57 @@ class WaterfallEngine {
   }
 
   spawnHitParticles(x, y, width, color) {
-    const count = Math.min(24, Math.max(12, Math.floor(width * 0.9)));
+    if (this.fidelity === 'low') return; // Zero particle overhead in Low fidelity
+    const maxAllowed = this.fidelity === 'medium' ? 20 : 80;
+    if (this.particles.length >= maxAllowed) return;
+
+    const count = this.fidelity === 'medium' ? 2 : Math.min(12, Math.max(6, Math.floor(width * 0.5)));
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: x + Math.random() * width,
-        y: y - Math.random() * 6,
-        vx: (Math.random() - 0.5) * 120,
-        vy: -Math.random() * 170 - 60,
-        size: Math.random() * 3.8 + 2.0,
+        y: y - Math.random() * 4,
+        vx: (Math.random() - 0.5) * 100,
+        vy: -Math.random() * 140 - 50,
+        size: Math.random() * 3.0 + 1.5,
         color: Math.random() > 0.35 ? color : '#ffffff',
         type: Math.random() > 0.4 ? 'star' : 'spark',
         life: 1.0,
-        decay: Math.random() * 2.2 + 1.2
+        decay: Math.random() * 2.2 + 1.4
       });
     }
   }
 
   spawnSustainedSparkles(x, y, width, color) {
-    // Continuous sparkling fountain while note is held/sustaining across its whole length
-    const count = Math.random() < 0.75 ? 2 : 1;
+    // Only sustained sparkles on High fidelity to save GPU/CPU cycles
+    if (this.fidelity !== 'high') return;
+    if (this.particles.length >= 60) return;
+
+    const count = Math.random() < 0.6 ? 1 : 0;
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: x + Math.random() * width,
         y: y - Math.random() * 4,
-        vx: (Math.random() - 0.5) * 80,
-        vy: -Math.random() * 120 - 45,
-        size: Math.random() * 3.0 + 1.5,
+        vx: (Math.random() - 0.5) * 60,
+        vy: -Math.random() * 100 - 40,
+        size: Math.random() * 2.5 + 1.2,
         color: Math.random() > 0.3 ? color : '#ffffff',
-        type: Math.random() > 0.45 ? 'star' : 'spark',
+        type: 'spark',
         life: 1.0,
-        decay: Math.random() * 2.8 + 1.8
+        decay: Math.random() * 3.0 + 2.0
       });
     }
   }
 
   updateAndRender(now) {
+    // Frame pacing / rate limiting (e.g. 30 FPS in Low mode for tablets like Mi Pad SE)
+    if (this.targetFps > 0 && this.frameInterval > 0) {
+      const elapsed = now - this.lastFrameTimestamp;
+      if (elapsed < this.frameInterval - 1.5) {
+        return; // Throttle to target FPS
+      }
+      this.lastFrameTimestamp = now - (elapsed % this.frameInterval);
+    }
+
     const dt = Math.min(0.1, (now - this.lastFrameTime) / 1000);
     this.lastFrameTime = now;
 
@@ -278,7 +328,9 @@ class WaterfallEngine {
     this.drawHitLine(w, hitY);
 
     // 4. Update & Draw Particles
-    this.drawParticles(dt);
+    if (this.fidelity !== 'low') {
+      this.drawParticles(dt);
+    }
 
     // 5. Draw Piano Keyboard
     this.piano.render(this.ctx, w, h, this.keyboardHeight);
@@ -288,22 +340,26 @@ class WaterfallEngine {
     const ctx = this.ctx;
     ctx.save();
 
-    // Subtle dark gradient background for waterfall area
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, hitY);
-    bgGrad.addColorStop(0, '#07080b');
-    bgGrad.addColorStop(0.8, '#0b0d14');
-    bgGrad.addColorStop(1, '#0e111a');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, hitY);
+    if (this.fidelity === 'low') {
+      // Fast solid background on Low fidelity (avoids linear gradient overhead per frame)
+      ctx.fillStyle = '#0a0d14';
+      ctx.fillRect(0, 0, width, hitY);
+    } else {
+      // Subtle dark gradient background for waterfall area
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, hitY);
+      bgGrad.addColorStop(0, '#07080b');
+      bgGrad.addColorStop(0.8, '#0b0d14');
+      bgGrad.addColorStop(1, '#0e111a');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, hitY);
+    }
 
     // Vertical key lanes
     this.piano.keys.forEach(k => {
       if (k.isBlack) {
-        // Darker shadow lane for black keys
         ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
         ctx.fillRect(k.x, 0, k.width, hitY);
       } else {
-        // Very subtle lane separator for white keys
         ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
         ctx.fillRect(k.x + k.width - 1, 0, 1, hitY);
       }
@@ -324,19 +380,38 @@ class WaterfallEngine {
 
     const currentFrameActivePitches = new Set();
 
-    this.notes.forEach(note => {
-      const noteEnd = note.startTime + note.duration;
-      // Skip notes outside window
-      if (noteEnd < windowStart || note.startTime > windowEnd) {
-        return;
+    // =========================================================================
+    // HIGH-PERFORMANCE BINARY SEARCH TIME-WINDOW NOTE SELECTION
+    // Eliminates scanning thousands of off-screen notes every single frame!
+    // =========================================================================
+    let low = 0;
+    let high = this.notes.length - 1;
+    let startIdx = 0;
+    while (low <= high) {
+      const mid = (low + high) >> 1;
+      const n = this.notes[mid];
+      if (n.startTime + (n.duration || 1) < windowStart) {
+        startIdx = mid + 1;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+    startIdx = Math.max(0, Math.min(startIdx, this.notes.length - 1));
+
+    for (let i = startIdx; i < this.notes.length; i++) {
+      const note = this.notes[i];
+      // Since notes are sorted by startTime, we can break as soon as startTime > windowEnd
+      if (note.startTime > windowEnd) {
+        break;
       }
 
-      const key = this.piano.getKey(note.pitch);
-      if (!key) return;
+      const noteEnd = note.startTime + note.duration;
+      if (noteEnd < windowStart) continue;
 
-      // Note Y positioning
-      // When curTime == note.startTime, bottomY = hitY
-      // When curTime > note.startTime and curTime < noteEnd, note is hitting!
+      const key = this.piano.getKey(note.pitch);
+      if (!key) continue;
+
       const timeUntilStart = note.startTime - curTime;
       const noteHeight = Math.max(6, note.duration * speed);
       const bottomY = hitY - timeUntilStart * speed;
@@ -353,35 +428,36 @@ class WaterfallEngine {
           isSong: true
         });
 
-        // If newly hitting, trigger sound and big burst
+        // Trigger note audio & particles
         if (!this.activeNotePool.has(note)) {
           this.activeNotePool.add(note);
           if (this.onNoteTrigger) this.onNoteTrigger(note.pitch, note.velocity);
           this.spawnHitParticles(key.x, hitY, key.width, note.color);
         } else {
-          // Continuous sparkling fountain while note is held/sustaining across its whole length!
           this.spawnSustainedSparkles(key.x, hitY, key.width, note.color);
         }
 
-        // Draw radiant vertical light energy beam shooting upward from hit line
-        const beamHeight = Math.min(180, hitY * 0.45);
-        const beamGrad = ctx.createLinearGradient(key.x, hitY, key.x, hitY - beamHeight);
-        beamGrad.addColorStop(0, typeof hexToRgba === 'function' ? hexToRgba(note.color, 0.45) : 'rgba(0, 229, 255, 0.45)');
-        beamGrad.addColorStop(0.5, typeof hexToRgba === 'function' ? hexToRgba(note.color, 0.15) : 'rgba(0, 229, 255, 0.15)');
-        beamGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = beamGrad;
-        ctx.fillRect(key.x, hitY - beamHeight, key.width, beamHeight);
+        // Draw light beam if in Medium or High fidelity
+        if (this.fidelity !== 'low') {
+          const beamHeight = Math.min(160, hitY * 0.4);
+          const beamGrad = ctx.createLinearGradient(key.x, hitY, key.x, hitY - beamHeight);
+          beamGrad.addColorStop(0, typeof hexToRgba === 'function' ? hexToRgba(note.color, 0.4) : 'rgba(0, 229, 255, 0.4)');
+          beamGrad.addColorStop(0.5, typeof hexToRgba === 'function' ? hexToRgba(note.color, 0.12) : 'rgba(0, 229, 255, 0.12)');
+          beamGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = beamGrad;
+          ctx.fillRect(key.x, hitY - beamHeight, key.width, beamHeight);
+        }
       }
 
-      // Visible bounds
-      if (topY > hitY || bottomY < 0) return;
+      // Visible bounds check
+      if (topY > hitY || bottomY < 0) continue;
 
       // Clip bottom to hitY if striking
       const renderBottomY = Math.min(hitY, bottomY);
       const renderHeight = Math.max(4, renderBottomY - topY);
 
       this.renderNoteBar(ctx, key.x + 1, topY, key.width - 2, renderHeight, note.color, isStriking, note);
-    });
+    }
 
     // Check notes that finished striking
     this.activeNotePool.forEach(note => {
@@ -397,22 +473,55 @@ class WaterfallEngine {
   }
 
   renderNoteBar(ctx, x, y, width, height, color, isStriking, note) {
-    ctx.save();
+    const isLow = this.fidelity === 'low';
+    const isMed = this.fidelity === 'medium';
 
-    // Inset slightly to give discrete retro arcade block segment look (matching the photo)
     const insetX = x + 0.5;
     const insetY = y + 0.5;
     const renderW = Math.max(3, width - 1);
     const renderH = Math.max(3, height - 1);
+
+    // =========================================================================
+    // LOW FIDELITY: ULTRA-FAST SOLID RETRO ARCADE BLOCK
+    // Zero shadow blur, zero gradient allocations, zero canvas state pushes
+    // =========================================================================
+    if (isLow) {
+      ctx.fillStyle = color;
+      ctx.fillRect(insetX, insetY, renderW, renderH);
+
+      // Simple glossy top highlight
+      ctx.fillStyle = isStriking ? '#ffffff' : 'rgba(255, 255, 255, 0.4)';
+      ctx.fillRect(insetX + 1, insetY, Math.max(1, renderW - 2), Math.min(3, renderH * 0.35));
+
+      // Crisp arcade tile border
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(insetX, insetY, renderW, renderH);
+
+      // Striking indicator border
+      if (isStriking) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(insetX, insetY, renderW, renderH);
+      }
+      return;
+    }
+
+    // =========================================================================
+    // MEDIUM & HIGH FIDELITY
+    // =========================================================================
+    ctx.save();
     const cornerRadius = Math.min(4, Math.min(renderW * 0.35, renderH * 0.35));
 
-    // Glow aura around note bar (especially intense when striking)
-    if (isStriking) {
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 18;
+    // Glow aura: Moderate blur on Medium, full blur on High
+    if (isMed) {
+      if (isStriking) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+      }
     } else {
       ctx.shadowColor = color;
-      ctx.shadowBlur = 5;
+      ctx.shadowBlur = isStriking ? 18 : 5;
     }
 
     // Rounded rectangle path for arcade block note
@@ -429,64 +538,58 @@ class WaterfallEngine {
     ctx.fillStyle = isStriking ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.38)';
     ctx.fillRect(insetX + 1, insetY, renderW - 2, Math.min(3, renderH * 0.35));
 
-    // Crisp arcade tile border (clean matrix segments as in photo)
+    // Crisp arcade tile border
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // =========================================================================
-    // Flashy Animation 1: Animated Shimmer Wave traveling along note length
-    // =========================================================================
-    const shimmerCycle = ((this.currentTime * 320 + note.pitch * 25) % (height + 70)) - 35;
-    if (shimmerCycle > -25 && shimmerCycle < height + 25) {
-      const shimmerY = y + shimmerCycle;
-      const sGrad = ctx.createLinearGradient(x, shimmerY - 18, x, shimmerY + 18);
-      sGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      sGrad.addColorStop(0.5, isStriking ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.5)');
-      sGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = sGrad;
-      const startClamped = Math.max(y, shimmerY - 18);
-      const endClamped = Math.min(y + height, shimmerY + 18);
-      if (endClamped > startClamped) {
-        ctx.fillRect(x + 1, startClamped, width - 2, endClamped - startClamped);
+    // Shimmer waves and sparkles on High fidelity only
+    if (!isMed && height > 24) {
+      const shimmerCycle = ((this.currentTime * 320 + note.pitch * 25) % (height + 70)) - 35;
+      if (shimmerCycle > -25 && shimmerCycle < height + 25) {
+        const shimmerY = y + shimmerCycle;
+        const sGrad = ctx.createLinearGradient(x, shimmerY - 18, x, shimmerY + 18);
+        sGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        sGrad.addColorStop(0.5, isStriking ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.5)');
+        sGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = sGrad;
+        const startClamped = Math.max(y, shimmerY - 18);
+        const endClamped = Math.min(y + height, shimmerY + 18);
+        if (endClamped > startClamped) {
+          ctx.fillRect(x + 1, startClamped, width - 2, endClamped - startClamped);
+        }
       }
     }
 
-    // =========================================================================
-    // Flashy Animation 2: Sparkling Diamond Stars along the WHOLE length of note
-    // =========================================================================
-    if (height > 10) {
-      const sparkleSpacing = Math.max(16, Math.min(30, height / 4));
+    if (!isMed && height > 16) {
+      const sparkleSpacing = Math.max(20, Math.min(36, height / 3));
       const numSparkles = Math.floor(height / sparkleSpacing);
 
       for (let s = 0; s < numSparkles; s++) {
-        // Hash for deterministic positioning per segment
         const hash = Math.sin(note.pitch * 13.7 + s * 7.9) * 43758.5453;
         const fracX = (hash - Math.floor(hash));
         const sparkleX = x + 3 + fracX * Math.max(1, width - 6);
         const sparkleY = y + s * sparkleSpacing + (sparkleSpacing * 0.5);
 
-        // Twinkle oscillation
         const twinkleFreq = 9.0 + (s % 3) * 3.5;
         const phase = note.pitch * 2.8 + s * 1.9;
         const twinkle = 0.5 + 0.5 * Math.sin(this.currentTime * twinkleFreq + phase);
 
-        // Flash threshold: draw diamond star glint
-        if (twinkle > 0.38) {
-          const starRadius = (width > 22 ? 4.5 : 3.0) * (0.6 + 0.65 * twinkle);
+        if (twinkle > 0.45) {
+          const starRadius = (width > 22 ? 4.0 : 2.5) * (0.6 + 0.65 * twinkle);
           const alpha = twinkle * (isStriking ? 1.0 : 0.85);
           this.drawSparkleStar(ctx, sparkleX, sparkleY, starRadius, color, alpha);
         }
       }
     }
 
-    // Extra flashy star flare at bottom impact point when striking
-    if (isStriking) {
+    // Extra star flare when striking
+    if (isStriking && !isMed) {
       const flareSize = (width > 20 ? 8 : 5.5) * (0.8 + 0.3 * Math.sin(this.currentTime * 20));
       this.drawSparkleStar(ctx, x + width / 2, y + height - 2, flareSize, color, 1.0);
     }
 
-    // If key is wide enough, display note name
+    // Display note name if wide enough
     if (width > 24 && height > 16) {
       ctx.fillStyle = '#0a0c10';
       ctx.font = 'bold 10px sans-serif';
@@ -502,9 +605,15 @@ class WaterfallEngine {
 
   drawHitLine(width, hitY) {
     const ctx = this.ctx;
-    ctx.save();
 
-    // Radiant hit-line glow where waterfall meets the keys
+    if (this.fidelity === 'low') {
+      // Solid fast 1px hit line (no gradient)
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(0, hitY - 1, width, 1.5);
+      return;
+    }
+
+    ctx.save();
     const lineGrad = ctx.createLinearGradient(0, hitY - 4, 0, hitY + 2);
     lineGrad.addColorStop(0, 'rgba(0, 229, 255, 0)');
     lineGrad.addColorStop(0.7, 'rgba(0, 229, 255, 0.45)');
@@ -513,14 +622,13 @@ class WaterfallEngine {
     ctx.fillStyle = lineGrad;
     ctx.fillRect(0, hitY - 4, width, 5);
 
-    // Laser thin beam
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, hitY - 1, width, 1.5);
-
     ctx.restore();
   }
 
   drawParticles(dt) {
+    if (this.fidelity === 'low' || this.particles.length === 0) return;
     const ctx = this.ctx;
     ctx.save();
 
@@ -542,14 +650,12 @@ class WaterfallEngine {
       } else {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
         ctx.fill();
 
-        // White hot center
+        // White center
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(p.x, p.y, Math.max(0.6, (p.size * alpha) * 0.4), 0, Math.PI * 2);

@@ -12,6 +12,13 @@
 
 - [x] **C Major & White Keys Only**: Default musical scale and visual key mapping set to C Major using only the 52 white keys for a pure, sweet diatonic harmony with no clashing black keys. UI settings selector added to Desktop controls, Custom Pattern creator, and Settings drawer.
 
-- [ ] **Particle effects**: Make particle pixel effects for explosions but try to use precalculated values to limit the cpu usage on low end devices. Maybe move heavier calculations to a backend?
+- [x] **Small Tablet & Budget Device Optimization (Mi Pad SE)**:
+  - Added Fidelity / Performance selector (**Low 30Hz**, **Medium 60Hz**, **High Ultra Glow**) with automatic tablet detection.
+  - **Low Mode**: Capped at 30Hz update, clamped DPR to 1.0 (eliminates 4x retina fill-rate overhead), 0 shadow blur passes, 0 gradient allocations per frame.
+  - **High-Performance Audio**: Lightweight 1-oscillator warm piano synth, convolver reverb bypass, and strict polyphony voice stealing on budget tablets.
+  - **Binary Search Viewport Windowing**: Replaced O(N) linear scanning of thousands of notes with binary-searched time-window lookup O(log N + visible).
+
+- [x] **Particle effects & low-end performance**: Particles completely disabled in Low mode to eliminate draw calls and memory churn; capped to 20 lightweight particles in Medium mode.
+
 
 

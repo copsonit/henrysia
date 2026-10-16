@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rangeSelect = document.getElementById('rangeSelect');
   const labelsSelect = document.getElementById('labelsSelect');
   const scaleSelect = document.getElementById('scaleSelect');
+  const fidelitySelect = document.getElementById('fidelitySelect');
   const volumeSlider = document.getElementById('volumeSlider');
   const downloadMidiBtn = document.getElementById('downloadMidiBtn');
   const midiFileInput = document.getElementById('midiFileInput');
@@ -61,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalSoundSelect = document.getElementById('modalSoundSelect');
   const modalLabelsSelect = document.getElementById('modalLabelsSelect');
   const modalScaleSelect = document.getElementById('modalScaleSelect');
+  const modalFidelitySelect = document.getElementById('modalFidelitySelect');
   const modalSpeedSelect = document.getElementById('modalSpeedSelect');
   const fullscreenBtn = document.getElementById('fullscreenBtn');
   const modalFullscreenBtn = document.getElementById('modalFullscreenBtn');
@@ -233,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalSoundSelect) modalSoundSelect.value = soundSelect.value;
       if (modalLabelsSelect) modalLabelsSelect.value = labelsSelect.value;
       if (modalScaleSelect && scaleSelect) modalScaleSelect.value = scaleSelect.value;
+      if (modalFidelitySelect && fidelitySelect) modalFidelitySelect.value = fidelitySelect.value;
       if (modalSpeedSelect) modalSpeedSelect.value = speedSelect.value;
       settingsModal.classList.add('active');
     });
@@ -296,6 +299,33 @@ document.addEventListener('DOMContentLoaded', () => {
       waterfall.playbackRate = parseFloat(e.target.value);
     });
   }
+
+  // =========================================================================
+  // Fidelity / Performance Mode (Tablet / Mi Pad SE Optimization)
+  // =========================================================================
+  const isBudgetOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet/i.test(navigator.userAgent) ||
+    (window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+
+  const savedFidelity = localStorage.getItem('henrysia_fidelity') || (isBudgetOrTablet ? 'low' : 'medium');
+
+  function applyFidelity(mode) {
+    if (fidelitySelect) fidelitySelect.value = mode;
+    if (modalFidelitySelect) modalFidelitySelect.value = mode;
+    waterfall.setFidelity(mode);
+    audio.setFidelity(mode);
+    piano.setFidelity(mode);
+    localStorage.setItem('henrysia_fidelity', mode);
+  }
+
+  if (fidelitySelect) {
+    fidelitySelect.addEventListener('change', (e) => applyFidelity(e.target.value));
+  }
+  if (modalFidelitySelect) {
+    modalFidelitySelect.addEventListener('change', (e) => applyFidelity(e.target.value));
+  }
+
+  // Apply default or saved fidelity immediately
+  applyFidelity(savedFidelity);
 
   // Download Current Song / Pattern as MIDI
   downloadMidiBtn.addEventListener('click', () => {

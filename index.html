@@ -156,6 +156,13 @@
           <option value="pentatonic">Pentatonic Bells</option>
           <option value="chime">Glass Chimes</option>
         </select>
+
+        <!-- Performance & Fidelity Mode Selector -->
+        <select id="fidelitySelect" class="select-control" title="Performance & Fidelity Mode">
+          <option value="low">⚡ Low (30Hz Tablet)</option>
+          <option value="medium" selected>⚖️ Medium (60Hz)</option>
+          <option value="high">✨ High (Ultra Glow)</option>
+        </select>
       </div>
 
       <!-- Volume -->
@@ -310,6 +317,16 @@
           <option value="chime">Glass Chimes</option>
         </select>
         <div class="field-hint">C Major (White Keys Only) plays pure natural notes on the 52 white keys.</div>
+      </div>
+
+      <div class="form-group">
+        <label>⚡ Performance & Fidelity (FPS / Battery)</label>
+        <select id="modalFidelitySelect" class="select-control">
+          <option value="low">⚡ Low (30Hz • Budget Tablets • Battery Saver)</option>
+          <option value="medium" selected>⚖️ Medium (60Hz • Balanced Performance)</option>
+          <option value="high">✨ High (60+ FPS • Ultra Glow & Particles)</option>
+        </select>
+        <div class="field-hint">Low mode caps at 30Hz, disables heavy blur and particle effects, and uses lightweight sound for smooth performance on small/budget tablets like Mi Pad SE.</div>
       </div>
 
       <div class="form-group">
