@@ -259,38 +259,100 @@ body {
 }
 
 /* ==========================================================================
-   Bottom Floating Transport Dock
+   Bottom Floating Transport Dock & Selectors Strip
    ========================================================================== */
 .transport-dock {
-  height: 56px;
-  min-height: 56px;
+  min-height: 84px;
+  height: auto;
   background: var(--panel-bg);
   border-top: 1px solid var(--panel-border);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 14px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   z-index: 20;
   backdrop-filter: blur(16px);
+  gap: 4px;
+  box-sizing: border-box;
 }
 
-.desktop-selectors {
+.transport-main-row {
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  min-height: 40px;
 }
 
-.transport-left, .transport-center, .transport-right {
+.transport-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .transport-center {
   flex: 1;
-  max-width: 620px;
-  padding: 0 20px;
+  min-width: 0;
+  max-width: 580px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.transport-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dock-selectors {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 4px 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  touch-action: pan-x;
+}
+
+.dock-selectors::-webkit-scrollbar {
+  height: 3px;
+}
+
+.dock-selectors::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.dock-selectors .select-control {
+  flex-shrink: 0;
+  height: 32px;
+  font-size: 0.8rem;
+  padding: 2px 24px 2px 10px;
+  border-radius: 16px;
+  white-space: nowrap;
+}
+
+.dock-selectors .select-control.highlight-control {
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  background-color: rgba(0, 229, 255, 0.12);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+}
+
+.dock-selectors .select-control.highlight-control:hover,
+.dock-selectors .select-control.highlight-control:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.4);
 }
 
 .play-pause-btn {
@@ -526,12 +588,6 @@ body {
 /* ==========================================================================
    Responsive & Tablet Adaptations
    ========================================================================== */
-@media (max-width: 1150px) {
-  .desktop-selectors {
-    display: none !important;
-  }
-}
-
 @media (max-width: 900px) {
   .studio-header {
     padding: 0 10px;
@@ -548,20 +604,20 @@ body {
     display: none !important;
   }
   .transport-dock {
-    height: 52px;
-    min-height: 52px;
-    padding: 0 10px;
-    gap: 8px;
+    min-height: 76px;
+    height: auto;
+    padding: 4px 10px;
+    gap: 4px;
     padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   }
-  .transport-left, .transport-center, .transport-right {
+  .transport-left, .transport-center, .transport-right-actions {
     gap: 8px;
   }
   .transport-center {
-    padding: 0 8px;
+    padding: 0 6px;
   }
   .play-pause-btn {
-    padding: 6px 12px;
+    padding: 6px 14px;
     font-size: 0.88rem;
   }
   .play-pause-btn span {
@@ -575,11 +631,30 @@ body {
     min-width: 28px;
   }
   .volume-slider {
-    width: 55px;
+    width: 50px;
+  }
+  .dock-selectors .select-control {
+    height: 30px;
+    font-size: 0.76rem;
+    padding: 2px 20px 2px 8px;
   }
 }
 
 @media (max-width: 600px) {
+  .transport-dock {
+    min-height: 72px;
+    height: auto;
+    padding: 3px 6px;
+    gap: 3px;
+  }
+  .transport-main-row {
+    min-height: 36px;
+  }
+  .dock-selectors .select-control {
+    height: 28px;
+    font-size: 0.72rem;
+    padding: 1px 18px 1px 7px;
+  }
   .volume-wrapper {
     display: none !important;
   }
@@ -610,10 +685,14 @@ body {
     height: 24px;
   }
   .transport-dock {
-    height: 46px;
-    min-height: 46px;
-    padding: 0 8px;
+    min-height: 68px;
+    height: auto;
+    padding: 3px 8px;
+    gap: 2px;
     padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  }
+  .transport-main-row {
+    min-height: 34px;
   }
   .btn {
     padding: 5px 10px;
@@ -622,5 +701,10 @@ body {
   .select-control {
     padding: 4px 8px;
     font-size: 0.8rem;
+  }
+  .dock-selectors .select-control {
+    height: 28px;
+    font-size: 0.72rem;
+    padding: 1px 18px 1px 6px;
   }
 }
