@@ -276,53 +276,56 @@ class PianoKeyboard {
     ctx.save();
 
     if (active) {
-      // Pressed White Key
-      // Depressed visual: slightly shorter gradient + colored top cap and glow
-      const grad = ctx.createLinearGradient(x, y, x, y + height);
-      grad.addColorStop(0, '#e0e7ee');
-      grad.addColorStop(0.85, '#cfd8dc');
-      grad.addColorStop(1, '#b0bec5');
-      ctx.fillStyle = grad;
-      ctx.fillRect(x + 1, y + 2, width - 2, height - 2);
+      // Pressed White Key: Fully illuminated with the note's vibrant color (as shown in photo)
+      const activeColor = active.color || '#00e5ff';
 
-      // Key depression shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      // Full-length vertical glow gradient
+      const grad = ctx.createLinearGradient(x, y, x, y + height);
+      grad.addColorStop(0, '#ffffff');                     // Intense impact point
+      grad.addColorStop(0.08, activeColor);                // Full vibrant neon color
+      grad.addColorStop(0.70, hexToRgba(activeColor, 0.85));// Luminous key body
+      grad.addColorStop(1, hexToRgba(activeColor, 0.65));   // Illuminated bottom bevel
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(x + 0.5, y + 1, width - 1, height - 1);
+
+      // Key depression shadow at top
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillRect(x + 1, y, width - 2, 3);
+
+      // Glowing border
+      ctx.strokeStyle = activeColor;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 0.5, y + 1, width - 1, height - 1);
+
+      // Bright laser impact bar at top contact edge
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(x + 1, y, width - 2, 4);
 
-      // Radiant glow on pressed key cap
-      const activeColor = active.color || '#00e5ff';
-      const capGrad = ctx.createLinearGradient(x, y, x, y + height * 0.45);
-      capGrad.addColorStop(0, activeColor);
-      capGrad.addColorStop(0.5, hexToRgba(activeColor, 0.45));
-      capGrad.addColorStop(1, 'rgba(0,0,0,0)');
-
-      ctx.fillStyle = capGrad;
-      ctx.fillRect(x + 1, y, width - 2, height * 0.45);
-
-      // Bright impact line at the very top edge
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x + 1, y, width - 2, 3);
+      // Ambient neon bloom
+      ctx.shadowColor = activeColor;
+      ctx.shadowBlur = 14;
     } else {
-      // Normal White Key with 3D ivory gradient
+      // Normal White Key: Sleek darker ivory/slate with high-contrast bevels
       const grad = ctx.createLinearGradient(x, y, x, y + height);
-      grad.addColorStop(0, '#fbfbfb');
-      grad.addColorStop(0.7, '#f0f3f6');
-      grad.addColorStop(0.95, '#e4e8ec');
-      grad.addColorStop(1, '#caced2');
+      grad.addColorStop(0, '#d1d8e2');
+      grad.addColorStop(0.2, '#c4ccd7');
+      grad.addColorStop(0.85, '#a8b2bf');
+      grad.addColorStop(1, '#8c96a4');
 
       ctx.fillStyle = grad;
       ctx.fillRect(x + 0.5, y, width - 1, height);
 
       // Subtle right edge separator bevel
-      ctx.fillStyle = '#9e9e9e';
+      ctx.fillStyle = '#555f6d';
       ctx.fillRect(x + width - 1, y, 1, height);
 
       // Subtle left edge highlight
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
       ctx.fillRect(x + 0.5, y, 1, height);
 
       // Bottom curved bevel
-      ctx.fillStyle = '#828a92';
+      ctx.fillStyle = '#616c7a';
       ctx.fillRect(x + 1, y + height - 3, width - 2, 3);
     }
 
@@ -341,37 +344,40 @@ class PianoKeyboard {
     ctx.save();
 
     // Drop shadow beneath black key onto white keys
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
     ctx.fillRect(x - 2, y, width + 4, height + 4);
 
     if (active) {
-      // Pressed Black Key
-      const grad = ctx.createLinearGradient(x, y, x, y + height);
-      grad.addColorStop(0, '#222');
-      grad.addColorStop(1, '#111');
-      ctx.fillStyle = grad;
-      ctx.fillRect(x + 1, y + 2, width - 2, height - 2);
-
-      // Glowing color cap
+      // Pressed Black Key: Full-length neon illumination with dark gradient base
       const activeColor = active.color || '#ff0077';
-      const capGrad = ctx.createLinearGradient(x, y, x, y + height * 0.7);
-      capGrad.addColorStop(0, activeColor);
-      capGrad.addColorStop(0.5, hexToRgba(activeColor, 0.5));
-      capGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      const grad = ctx.createLinearGradient(x, y, x, y + height);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.12, activeColor);
+      grad.addColorStop(0.80, hexToRgba(activeColor, 0.85));
+      grad.addColorStop(1, '#0e0f14');
 
-      ctx.fillStyle = capGrad;
-      ctx.fillRect(x + 1, y + 2, width - 2, height * 0.6);
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y + 1, width, height - 1);
+
+      // Glowing outline
+      ctx.strokeStyle = activeColor;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y + 1, width, height - 1);
 
       // Top impact highlight
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(x + 1, y + 2, width - 2, 3);
+      ctx.fillRect(x, y, width, 4);
+
+      // Ambient neon bloom
+      ctx.shadowColor = activeColor;
+      ctx.shadowBlur = 16;
     } else {
-      // Realistic 3D Black Key (Matte Ebony with Bevel)
+      // Realistic 3D Obsidian Black Key (Matte Ebony with Bevel)
       const grad = ctx.createLinearGradient(x, y, x, y + height);
-      grad.addColorStop(0, '#3a3d42');
-      grad.addColorStop(0.15, '#22252a');
-      grad.addColorStop(0.85, '#17181c');
-      grad.addColorStop(1, '#0e0f11');
+      grad.addColorStop(0, '#2e3138');
+      grad.addColorStop(0.15, '#1b1d22');
+      grad.addColorStop(0.85, '#101114');
+      grad.addColorStop(1, '#08080a');
 
       ctx.fillStyle = grad;
       ctx.fillRect(x, y, width, height);
@@ -381,11 +387,11 @@ class PianoKeyboard {
       ctx.fillRect(x, y, 1.5, height);
 
       // Right edge shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
       ctx.fillRect(x + width - 1.5, y, 1.5, height);
 
       // Bottom step
-      ctx.fillStyle = '#0a0a0c';
+      ctx.fillStyle = '#060608';
       ctx.fillRect(x + 1, y + height - 4, width - 2, 4);
     }
 
@@ -416,14 +422,20 @@ class PianoKeyboard {
     const fontSize = isBlack 
       ? Math.max(7, Math.min(11, Math.round(key.width * 0.55)))
       : Math.max(8, Math.min(13, Math.round(key.width * 0.46)));
-    ctx.font = `bold ${fontSize}px 'Outfit', -apple-system, sans-serif`;
+    ctx.font = `bold ${fontSize}px 'Silkscreen', 'Outfit', -apple-system, sans-serif`;
     ctx.textAlign = 'center';
 
     if (isBlack) {
-      ctx.fillStyle = active ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
+      ctx.fillStyle = active ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
       ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 6);
     } else {
-      ctx.fillStyle = active ? '#000000' : (key.name === 'C' ? '#00e5ff' : '#6c7a89');
+      if (active) {
+        ctx.fillStyle = '#0a0c10';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+        ctx.shadowBlur = 4;
+      } else {
+        ctx.fillStyle = (key.name === 'C' ? '#00e5ff' : '#475569');
+      }
       ctx.fillText(text, key.x + key.width / 2, key.y + key.height - 8);
     }
   }

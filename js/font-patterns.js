@@ -4,6 +4,861 @@
  * with musical scale harmonization so patterns sound delightful to Henry.
  */
 
+// ============================================================================
+// SINCLAIR ZX SPECTRUM 8x8 FONT MATRIX
+// Authentic Sinclair ZX Spectrum ROM Character Set (matching user's reference image)
+// ============================================================================
+const FONT_SPECTRUM_8X8 = {
+  // Numbers (0-9)
+  '0': [
+    " 1111 ",
+    "1   11",
+    "1  1 1",
+    "1 1  1",
+    "11   1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  '1': [
+    "  11  ",
+    " 1 1  ",
+    "   1  ",
+    "   1  ",
+    "   1  ",
+    "   1  ",
+    " 11111",
+    "      "
+  ],
+  '2': [
+    " 1111 ",
+    "1    1",
+    "     1",
+    "   11 ",
+    "  1   ",
+    " 1    ",
+    "111111",
+    "      "
+  ],
+  '3': [
+    "11111 ",
+    "     1",
+    "     1",
+    "  111 ",
+    "     1",
+    "     1",
+    "11111 ",
+    "      "
+  ],
+  '4': [
+    "1    1",
+    "1    1",
+    "1    1",
+    "111111",
+    "     1",
+    "     1",
+    "     1",
+    "      "
+  ],
+  '5': [
+    "111111",
+    "1     ",
+    "1     ",
+    "11111 ",
+    "     1",
+    "     1",
+    "11111 ",
+    "      "
+  ],
+  '6': [
+    " 1111 ",
+    "1     ",
+    "1     ",
+    "11111 ",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  '7': [
+    "111111",
+    "     1",
+    "    1 ",
+    "   1  ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "      "
+  ],
+  '8': [
+    " 1111 ",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  '9': [
+    " 1111 ",
+    "1    1",
+    "1    1",
+    " 11111",
+    "     1",
+    "     1",
+    " 1111 ",
+    "      "
+  ],
+
+  // Uppercase Letters (A-Z)
+  'A': [
+    " 1111 ",
+    "1    1",
+    "1    1",
+    "111111",
+    "1    1",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'B': [
+    "11111 ",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "      "
+  ],
+  'C': [
+    " 11111",
+    "1     ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "1     ",
+    " 11111",
+    "      "
+  ],
+  'D': [
+    "1111  ",
+    "1   1 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1   1 ",
+    "1111  ",
+    "      "
+  ],
+  'E': [
+    "111111",
+    "1     ",
+    "1     ",
+    "11111 ",
+    "1     ",
+    "1     ",
+    "111111",
+    "      "
+  ],
+  'F': [
+    "111111",
+    "1     ",
+    "1     ",
+    "11111 ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "      "
+  ],
+  'G': [
+    " 11111",
+    "1     ",
+    "1     ",
+    "1  111",
+    "1    1",
+    "1    1",
+    " 11111",
+    "      "
+  ],
+  'H': [
+    "1    1",
+    "1    1",
+    "1    1",
+    "111111",
+    "1    1",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'I': [
+    "11111 ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "11111 ",
+    "      "
+  ],
+  'J': [
+    "   111",
+    "     1",
+    "     1",
+    "     1",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  'K': [
+    "1    1",
+    "1   1 ",
+    "1  1  ",
+    "111   ",
+    "1  1  ",
+    "1   1 ",
+    "1    1",
+    "      "
+  ],
+  'L': [
+    "1     ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "111111",
+    "      "
+  ],
+  'M': [
+    "1    1",
+    "11  11",
+    "1 11 1",
+    "1 11 1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'N': [
+    "1    1",
+    "11   1",
+    "1 1  1",
+    "1  1 1",
+    "1   11",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'O': [
+    " 1111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  'P': [
+    "11111 ",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "      "
+  ],
+  'Q': [
+    " 1111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1 1  1",
+    "1  1 1",
+    " 1111 ",
+    "     1"
+  ],
+  'R': [
+    "11111 ",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "1  1  ",
+    "1   1 ",
+    "1    1",
+    "      "
+  ],
+  'S': [
+    " 11111",
+    "1     ",
+    "1     ",
+    " 1111 ",
+    "     1",
+    "     1",
+    "11111 ",
+    "      "
+  ],
+  'T': [
+    "111111",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "      "
+  ],
+  'U': [
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  'V': [
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 1  1 ",
+    "  11  ",
+    "      "
+  ],
+  'W': [
+    "1    1",
+    "1    1",
+    "1    1",
+    "1 11 1",
+    "1 11 1",
+    "11  11",
+    "1    1",
+    "      "
+  ],
+  'X': [
+    "1    1",
+    "1    1",
+    " 1  1 ",
+    "  11  ",
+    " 1  1 ",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'Y': [
+    "1    1",
+    "1    1",
+    " 1  1 ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "      "
+  ],
+  'Z': [
+    "111111",
+    "     1",
+    "    1 ",
+    "   1  ",
+    "  1   ",
+    " 1    ",
+    "111111",
+    "      "
+  ],
+
+  // Lowercase Letters (a-z)
+  'a': [
+    "      ",
+    "      ",
+    " 1111 ",
+    "     1",
+    " 11111",
+    "1    1",
+    " 11111",
+    "      "
+  ],
+  'b': [
+    "1     ",
+    "1     ",
+    "11111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "      "
+  ],
+  'c': [
+    "      ",
+    "      ",
+    " 1111 ",
+    "1     ",
+    "1     ",
+    "1     ",
+    " 1111 ",
+    "      "
+  ],
+  'd': [
+    "     1",
+    "     1",
+    " 11111",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 11111",
+    "      "
+  ],
+  'e': [
+    "      ",
+    "      ",
+    " 1111 ",
+    "1    1",
+    "111111",
+    "1     ",
+    " 1111 ",
+    "      "
+  ],
+  'f': [
+    "  111 ",
+    " 1    ",
+    "1111  ",
+    " 1    ",
+    " 1    ",
+    " 1    ",
+    " 1    ",
+    "      "
+  ],
+  'g': [
+    "      ",
+    "      ",
+    " 11111",
+    "1    1",
+    "1    1",
+    " 11111",
+    "     1",
+    " 1111 "
+  ],
+  'h': [
+    "1     ",
+    "1     ",
+    "11111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'i': [
+    "  1   ",
+    "      ",
+    " 11   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    " 111  ",
+    "      "
+  ],
+  'j': [
+    "   1  ",
+    "      ",
+    "  11  ",
+    "   1  ",
+    "   1  ",
+    "   1  ",
+    "1  1  ",
+    " 11   "
+  ],
+  'k': [
+    "1     ",
+    "1     ",
+    "1   1 ",
+    "1  1  ",
+    "111   ",
+    "1  1  ",
+    "1   1 ",
+    "      "
+  ],
+  'l': [
+    " 11   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    "  1   ",
+    " 111  ",
+    "      "
+  ],
+  'm': [
+    "      ",
+    "      ",
+    "11 11 ",
+    "1 1 1 ",
+    "1 1 1 ",
+    "1 1 1 ",
+    "1   1 ",
+    "      "
+  ],
+  'n': [
+    "      ",
+    "      ",
+    "11111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    "      "
+  ],
+  'o': [
+    "      ",
+    "      ",
+    " 1111 ",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 1111 ",
+    "      "
+  ],
+  'p': [
+    "      ",
+    "      ",
+    "11111 ",
+    "1    1",
+    "1    1",
+    "11111 ",
+    "1     ",
+    "1     "
+  ],
+  'q': [
+    "      ",
+    "      ",
+    " 11111",
+    "1    1",
+    "1    1",
+    " 11111",
+    "     1",
+    "     1"
+  ],
+  'r': [
+    "      ",
+    "      ",
+    "11111 ",
+    "1   1 ",
+    "1     ",
+    "1     ",
+    "1     ",
+    "      "
+  ],
+  's': [
+    "      ",
+    "      ",
+    " 1111 ",
+    "1     ",
+    " 1111 ",
+    "     1",
+    "1111  ",
+    "      "
+  ],
+  't': [
+    " 1    ",
+    " 1    ",
+    "11111 ",
+    " 1    ",
+    " 1    ",
+    " 1  1 ",
+    "  11  ",
+    "      "
+  ],
+  'u': [
+    "      ",
+    "      ",
+    "1    1",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 11111",
+    "      "
+  ],
+  'v': [
+    "      ",
+    "      ",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 1  1 ",
+    "  11  ",
+    "      "
+  ],
+  'w': [
+    "      ",
+    "      ",
+    "1    1",
+    "1 11 1",
+    "1 11 1",
+    "11  11",
+    "1    1",
+    "      "
+  ],
+  'x': [
+    "      ",
+    "      ",
+    "1    1",
+    " 1  1 ",
+    "  11  ",
+    " 1  1 ",
+    "1    1",
+    "      "
+  ],
+  'y': [
+    "      ",
+    "      ",
+    "1    1",
+    "1    1",
+    "1    1",
+    " 11111",
+    "     1",
+    " 1111 "
+  ],
+  'z': [
+    "      ",
+    "      ",
+    "111111",
+    "   11 ",
+    "  11  ",
+    " 11   ",
+    "111111",
+    "      "
+  ],
+
+  // Punctuation & Symbols
+  ' ': [
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   ",
+    "   "
+  ],
+  '!': [
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "  11  ",
+    "      ",
+    "  11  ",
+    "      "
+  ],
+  '?': [
+    " 1111 ",
+    "1    1",
+    "     1",
+    "   11 ",
+    "   1  ",
+    "      ",
+    "   1  ",
+    "      "
+  ],
+  '#': [
+    " 1  1 ",
+    "111111",
+    " 1  1 ",
+    " 1  1 ",
+    "111111",
+    " 1  1 ",
+    " 1  1 ",
+    "      "
+  ],
+  '$': [
+    "  1   ",
+    " 11111",
+    "1 1   ",
+    " 1111 ",
+    "  1  1",
+    "11111 ",
+    "  1   ",
+    "      "
+  ],
+  '%': [
+    "11   1",
+    "11  1 ",
+    "   1  ",
+    "  1   ",
+    " 1  11",
+    "1   11",
+    "      ",
+    "      "
+  ],
+  '&': [
+    " 11   ",
+    "1  1  ",
+    " 11   ",
+    "1  1 1",
+    "1   1 ",
+    " 111 1",
+    "      ",
+    "      "
+  ],
+  '+': [
+    "      ",
+    "  11  ",
+    "  11  ",
+    "111111",
+    "  11  ",
+    "  11  ",
+    "      ",
+    "      "
+  ],
+  '-': [
+    "      ",
+    "      ",
+    "      ",
+    "111111",
+    "      ",
+    "      ",
+    "      ",
+    "      "
+  ],
+  '=': [
+    "      ",
+    "      ",
+    "111111",
+    "      ",
+    "111111",
+    "      ",
+    "      ",
+    "      "
+  ],
+  '/': [
+    "     1",
+    "    1 ",
+    "   1  ",
+    "  1   ",
+    " 1    ",
+    "1     ",
+    "      ",
+    "      "
+  ],
+  '*': [
+    "      ",
+    "1 11 1",
+    " 1111 ",
+    "111111",
+    " 1111 ",
+    "1 11 1",
+    "      ",
+    "      "
+  ],
+  ':': [
+    "      ",
+    "  11  ",
+    "  11  ",
+    "      ",
+    "  11  ",
+    "  11  ",
+    "      ",
+    "      "
+  ],
+  ';': [
+    "      ",
+    "  11  ",
+    "  11  ",
+    "      ",
+    "  11  ",
+    "  1   ",
+    " 1    ",
+    "      "
+  ],
+  '<': [
+    "    1 ",
+    "   1  ",
+    "  1   ",
+    " 1    ",
+    "  1   ",
+    "   1  ",
+    "    1 ",
+    "      "
+  ],
+  '>': [
+    " 1    ",
+    "  1   ",
+    "   1  ",
+    "    1 ",
+    "   1  ",
+    "  1   ",
+    " 1    ",
+    "      "
+  ],
+  '.': [
+    "      ",
+    "      ",
+    "      ",
+    "      ",
+    "      ",
+    "  11  ",
+    "  11  ",
+    "      "
+  ],
+  ',': [
+    "      ",
+    "      ",
+    "      ",
+    "      ",
+    "  11  ",
+    "  1   ",
+    " 1    ",
+    "      "
+  ],
+  // Fun Shapes
+  'HEART': [
+    " 11 11 ",
+    "1111111",
+    "1111111",
+    "1111111",
+    " 11111 ",
+    "  111  ",
+    "   1   ",
+    "       "
+  ],
+  'STAR': [
+    "   1   ",
+    "  111  ",
+    "1111111",
+    "  111  ",
+    " 11 11 ",
+    " 1   1 ",
+    "       ",
+    "       "
+  ],
+  'SMILEY': [
+    " 1111 ",
+    "1    1",
+    "1 11 1",
+    "1    1",
+    "1 11 1",
+    "11  11",
+    " 1111 ",
+    "      "
+  ],
+  'NOTE': [
+    "    11",
+    "    11",
+    "    1 ",
+    "    1 ",
+    "  111 ",
+    " 1111 ",
+    "  11  ",
+    "      "
+  ]
+};
+
 // 5x7 Dot Matrix Font for A-Z, 0-9, and Special Symbols
 const FONT_5X7 = {
   // Letters
@@ -241,13 +1096,13 @@ const FONT_5X7 = {
     "1    ",
     "11111"
   ],
-  // Numbers
+  // Retro Video Game Arcade Numbers (as shown in Synthesia & arcade waterfalls)
   '0': [
     " 111 ",
-    "1  11",
-    "1 1 1",
-    "1 1 1",
-    "11  1",
+    "1   1",
+    "1   1",
+    "1   1",
+    "1   1",
     "1   1",
     " 111 "
   ],
@@ -258,7 +1113,7 @@ const FONT_5X7 = {
     "  1  ",
     "  1  ",
     "  1  ",
-    "11111"
+    "  1  "
   ],
   '2': [
     " 111 ",
@@ -273,7 +1128,7 @@ const FONT_5X7 = {
     "1111 ",
     "    1",
     "    1",
-    "  11 ",
+    " 111 ",
     "    1",
     "    1",
     "1111 "
@@ -309,10 +1164,10 @@ const FONT_5X7 = {
     "11111",
     "    1",
     "   1 ",
+    "   1 ",
     "  1  ",
-    " 1   ",
-    " 1   ",
-    " 1   "
+    "  1  ",
+    "  1  "
   ],
   '8': [
     " 111 ",
@@ -398,101 +1253,324 @@ const FONT_5X7 = {
   ]
 };
 
+// ============================================================================
+// CHARACTER COLOR SYSTEM (Roadmap: Rainbow for 0-9 & unique color per letter)
+// Matches the visual piano arcade waterfall in the user's photo
+// ============================================================================
+
+// Rainbow spectrum for numbers 0-9 matching the photo
+const DIGIT_COLORS = {
+  '0': '#ff3b56', // Vibrant Coral Pink / Red (matches '0' in photo)
+  '1': '#ffea00', // Electric Golden Yellow (matches '1' in photo)
+  '2': '#00e676', // Bright Green (matches '2' in photo)
+  '3': '#00e5ff', // Neon Cyan / Aqua
+  '4': '#2979ff', // Electric Sky Blue (matches blue key in photo)
+  '5': '#7c4dff', // Deep Purple / Violet
+  '6': '#f72585', // Neon Magenta
+  '7': '#76ff03', // Neon Lime / Chartreuse (matches '7' in photo)
+  '8': '#ff7b00', // Vivid Amber Orange
+  '9': '#ff0055'  // Brilliant Crimson Rose
+};
+
+// Unique vibrant color for every letter A-Z
+const LETTER_COLORS = {
+  'A': '#ff2a6d', // Hot Pink
+  'B': '#05d9e8', // Cyan
+  'C': '#00ff66', // Neon Green
+  'D': '#ffb800', // Gold
+  'E': '#ff5c00', // Orange
+  'F': '#b026ff', // Purple
+  'G': '#00f0ff', // Electric Blue
+  'H': '#ff0055', // Crimson Pink
+  'I': '#ffe600', // Sun Yellow
+  'J': '#39ff14', // Neon Lime
+  'K': '#00bcd4', // Turquoise
+  'L': '#e040fb', // Violet
+  'M': '#ff3366', // Coral Red
+  'N': '#00e5ff', // Aqua
+  'O': '#76ff03', // Lime
+  'P': '#ff9100', // Tangerine
+  'Q': '#7c4dff', // Deep Indigo
+  'R': '#ff1744', // Ruby
+  'S': '#00e676', // Emerald
+  'T': '#ffd600', // Amber
+  'U': '#1de9b6', // Teal
+  'V': '#d500f9', // Fuchsia
+  'W': '#ff6e40', // Peach Orange
+  'X': '#651fff', // Electric Violet
+  'Y': '#aeea00', // Chartreuse
+  'Z': '#00b0ff'  // Sky Blue
+};
+
+// Fun shapes & punctuation
+const SYMBOL_COLORS = {
+  'HEART': '#ff1744',
+  'STAR': '#ffd600',
+  'SMILEY': '#00e5ff',
+  'NOTE': '#b026ff',
+  '!': '#ffea00',
+  '?': '#05d9e8'
+};
+
+function getCharacterColor(char) {
+  if (!char) return '#00e5ff';
+  const upper = char.toString().toUpperCase();
+  if (DIGIT_COLORS[upper]) return DIGIT_COLORS[upper];
+  if (LETTER_COLORS[upper]) return LETTER_COLORS[upper];
+  if (SYMBOL_COLORS[upper]) return SYMBOL_COLORS[upper];
+  // Deterministic fallback for any other char
+  const code = upper.charCodeAt(0);
+  const hue = (code * 137.5) % 360;
+  return `hsl(${hue}, 100%, 55%)`;
+}
+
 // Scale mappings: ensures that rows of pixels sound harmonic rather than dissonant
+// MIDI pitches for all 52 white keys on an 88-key piano (A0 to C8)
+// Pure C Major diatonic naturals (A, B, C, D, E, F, G) with NO sharps/flats
+const WHITE_KEYS_88 = [
+  21, 23, 24, 26, 28, 29, 31, 33, 35, 36, 38, 40, 41, 43, 45, 47, 48, 50, 52, 53, 55, 57, 59,
+  60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83, 84, 86, 88, 89, 91, 93, 95, 96, 98,
+  100, 101, 103, 105, 107, 108
+];
+
+// All 88 chromatic keys (MIDI 21 to 108)
+const CHROMATIC_88 = Array.from({ length: 88 }, (_, i) => 21 + i);
+
+// Celestial Pentatonic across all octaves
+const PENTATONIC_88 = [
+  21, 24, 26, 28, 31, 33, 36, 38, 40, 43, 45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72, 74, 76, 79, 81, 84, 86, 88, 91, 93, 96, 98, 100, 103, 105, 108
+];
+
+// Celestial Chimes (Arpeggiated chords)
+const CHIMES_88 = [
+  24, 28, 31, 35, 36, 40, 43, 47, 48, 52, 55, 59, 60, 64, 67, 71, 72, 76, 79, 83, 84, 88, 91, 95, 96, 100, 103, 107, 108
+];
+
 const SCALES = {
-  // C Pentatonic Major: 15 notes across 3 octaves (C3, D3, E3, G3, A3, C4, D4, E4, G4, A4, C5, D5, E5, G5, A5)
-  pentatonic: [48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72, 74, 76, 79, 81, 84, 86, 88, 91, 93],
-  // C Major: (C3, D3, E3, F3, G3, A3, B3, C4...)
-  major: [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83, 84],
-  // Celestial Chimes (Arpeggiated chords: C, E, G, B, D, G, B)
-  chime: [48, 52, 55, 59, 62, 64, 67, 71, 74, 76, 79, 83, 86, 88, 91, 95]
+  whiteKeys: WHITE_KEYS_88,
+  major: WHITE_KEYS_88,
+  cMajor: WHITE_KEYS_88,
+  chromatic: CHROMATIC_88,
+  allKeys: CHROMATIC_88,
+  pentatonic: PENTATONIC_88,
+  chime: CHIMES_88
 };
 
 class PatternGenerator {
+  static getCharacterColor(char) {
+    return getCharacterColor(char);
+  }
+
+  static getFont(fontName) {
+    if (fontName === 'arcade5x7') return FONT_5X7;
+    return FONT_SPECTRUM_8X8;
+  }
+
+  static getKeysForScale(scale = 'whiteKeys') {
+    if (SCALES[scale]) return SCALES[scale];
+    if (scale === 'allKeys' || scale === 'chromatic') return CHROMATIC_88;
+    return WHITE_KEYS_88;
+  }
+
   /**
    * Converts any text string into falling visual piano waterfall notes.
-   * Mode: 'banner' (all letters across keyboard) or 'sequential' (one letter at a time)
+   * Mode:
+   *  - 'cascade' (default): Multi-line cascade! Words or lines cascade one after another,
+   *    each line centered across the piano keys (e.g. "HAPPY" on line 1, "BIRTHDAY" on line 2).
+   *  - 'banner': All letters fit across keys simultaneously on one line.
+   *  - 'sequential': One single letter at a time centered.
+   * Scale defaults to 'whiteKeys' (C Major, only white keys).
    */
   static generateTextNotes(text, options = {}) {
-    const mode = options.mode || 'banner'; // 'banner' or 'sequential'
-    const scaleName = options.scale || 'pentatonic';
-    const scale = SCALES[scaleName] || SCALES.pentatonic;
-    const charSpacingSec = options.charSpacingSec || 1.8;
-    const rowDurationSec = options.rowDurationSec || 0.18;
+    const rawMode = options.mode || 'cascade';
+    const fontName = options.font || 'spectrum';
+    const font = PatternGenerator.getFont(fontName);
+    const rowDurationSec = options.rowDurationSec || (fontName === 'arcade5x7' ? 0.18 : 0.15);
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
     const notes = [];
 
-    const chars = text.toUpperCase().split('');
-    if (chars.length === 0) return notes;
+    const trimmed = (text || '').trim();
+    if (!trimmed) return notes;
 
-    if (mode === 'banner') {
-      // Fit letters side by side across the keyboard
-      const totalLetterWidth = 6; // 5 columns + 1 blank column
-      const totalColumnsNeeded = chars.length * totalLetterWidth;
+    // Helper: generates notes for a single line of text centered across available keys
+    const generateSingleLine = (lineStr, startTime, channelOffset = 0) => {
+      const chars = lineStr.split('');
+      if (chars.length === 0) return 0;
 
-      // Find center start index in scale
-      const centerScaleIdx = Math.floor(scale.length / 2);
-      const startScaleIdx = Math.max(0, centerScaleIdx - Math.floor(totalColumnsNeeded / 2));
+      const getMatrix = (ch) => font[ch] || font[ch.toUpperCase()] || font[' '];
 
+      // Determine optimal character width (6, 5, or 4) and gap (1 or 0)
+      // so the line fits without truncation across the available keys (e.g. 52 white keys)
+      let charWidth = 6;
+      let gap = 1;
+
+      const computeTotalCols = (w, g) => {
+        let cols = 0;
+        for (let i = 0; i < chars.length; i++) {
+          if (chars[i] === ' ') {
+            cols += Math.max(2, Math.floor(w / 2));
+          } else {
+            cols += w;
+          }
+          if (i < chars.length - 1 && chars[i] !== ' ' && chars[i + 1] !== ' ') {
+            cols += g;
+          }
+        }
+        return cols;
+      };
+
+      let totalCols = computeTotalCols(charWidth, gap);
+      if (totalCols > totalKeys) {
+        // Step 1: Condense to 5-col width with 1-col gap (e.g. BIRTHDAY on 52 white keys = 47 cols)
+        charWidth = 5;
+        gap = 1;
+        totalCols = computeTotalCols(charWidth, gap);
+      }
+      if (totalCols > totalKeys) {
+        // Step 2: Try 5-col width with 0 gap
+        gap = 0;
+        totalCols = computeTotalCols(charWidth, gap);
+      }
+      if (totalCols > totalKeys) {
+        // Step 3: Try 4-col width
+        charWidth = 4;
+        gap = 1;
+        totalCols = computeTotalCols(charWidth, gap);
+      }
+      if (totalCols > totalKeys) {
+        charWidth = 4;
+        gap = 0;
+        totalCols = computeTotalCols(charWidth, gap);
+      }
+
+      // Center the line across available keys
+      const centerKeyIdx = Math.floor(totalKeys / 2);
+      const startKeyIdx = Math.max(0, centerKeyIdx - Math.floor(totalCols / 2));
+
+      let currentCol = startKeyIdx;
       chars.forEach((ch, charIdx) => {
-        const matrix = FONT_5X7[ch] || FONT_5X7[' '];
-        const baseColIdx = startScaleIdx + (charIdx * totalLetterWidth);
+        if (ch === ' ') {
+          currentCol += Math.max(2, Math.floor(charWidth / 2));
+          return;
+        }
 
-        // In visual piano waterfalls, notes scroll DOWN to the keyboard.
-        // Therefore, row 0 (top of the letter) must hit LATER (higher time),
-        // and row 6 (bottom of the letter) must hit FIRST (earlier time),
-        // so that as it falls onto the screen, it is right-side up!
+        const matrix = getMatrix(ch);
+        const charColor = getCharacterColor(ch);
         const totalRows = matrix.length;
+        const nativeCharW = (matrix[0] && matrix[0].length) ? matrix[0].length : 6;
 
         for (let r = 0; r < totalRows; r++) {
           const rowStr = matrix[r];
-          // Bottom row (r = totalRows - 1) hits at time = 0.5s
-          // Top row (r = 0) hits at time = 0.5s + (totalRows - 1 - r) * rowDurationSec
-          const timeOffset = 0.5 + (totalRows - 1 - r) * rowDurationSec;
+          // Row 0 hits later (top), Row 7 hits first (bottom) so it scrolls down right side up
+          const timeOffset = startTime + (totalRows - 1 - r) * rowDurationSec;
 
-          for (let c = 0; c < 5; c++) {
-            if (rowStr[c] === '1') {
-              const pitchIdx = Math.min(scale.length - 1, baseColIdx + c);
-              const pitch = scale[pitchIdx];
+          for (let c = 0; c < charWidth; c++) {
+            let pixelOn = false;
+            if (charWidth === nativeCharW) {
+              pixelOn = rowStr[c] === '1';
+            } else if (charWidth === 5 && nativeCharW === 6) {
+              if (c < 4) {
+                pixelOn = rowStr[c] === '1';
+              } else {
+                pixelOn = rowStr[4] === '1' || rowStr[5] === '1';
+              }
+            } else if (charWidth === 4 && nativeCharW === 6) {
+              const sampleCol = Math.min(nativeCharW - 1, Math.round(c * (nativeCharW - 1) / (charWidth - 1)));
+              pixelOn = rowStr[sampleCol] === '1';
+            } else {
+              const sampleCol = Math.min(nativeCharW - 1, Math.floor(c * nativeCharW / charWidth));
+              pixelOn = rowStr[sampleCol] === '1';
+            }
 
-              notes.push({
-                pitch: pitch,
-                startTime: timeOffset,
-                duration: rowDurationSec * 1.1,
-                velocity: 0.85,
-                channel: charIdx % 2
-              });
+            if (pixelOn) {
+              const colIdx = currentCol + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                const pitch = availableKeys[colIdx];
+                notes.push({
+                  pitch: pitch,
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.86,
+                  channel: (charIdx + channelOffset) % 2,
+                  char: ch.toUpperCase(),
+                  charColor: charColor,
+                  color: charColor
+                });
+              }
             }
           }
         }
+
+        currentCol += charWidth;
+        if (charIdx < chars.length - 1 && chars[charIdx + 1] !== ' ') {
+          currentCol += gap;
+        }
       });
-    } else {
-      // Sequential: Display letters one after another centered on the keyboard
-      const centerIdx = Math.floor(scale.length / 2) - 2;
+
+      return 8 * rowDurationSec; // duration of line in seconds
+    };
+
+    if (rawMode === 'sequential') {
+      // Sequential: one single character at a time centered
+      const charSpacingSec = options.charSpacingSec || 1.6;
+      const chars = trimmed.split('');
+      const centerKeyIdx = Math.floor(totalKeys / 2) - 3;
 
       chars.forEach((ch, charIdx) => {
-        const matrix = FONT_5X7[ch] || FONT_5X7[' '];
+        if (ch === ' ') return;
+        const matrix = font[ch] || font[ch.toUpperCase()] || font[' '];
         const charStartTime = 0.5 + (charIdx * charSpacingSec);
+        const charColor = getCharacterColor(ch);
         const totalRows = matrix.length;
+        const charWidth = matrix[0] ? matrix[0].length : 6;
 
         for (let r = 0; r < totalRows; r++) {
           const rowStr = matrix[r];
           const timeOffset = charStartTime + (totalRows - 1 - r) * rowDurationSec;
 
-          for (let c = 0; c < 5; c++) {
+          for (let c = 0; c < charWidth; c++) {
             if (rowStr[c] === '1') {
-              const pitchIdx = Math.min(scale.length - 1, Math.max(0, centerIdx + c));
-              const pitch = scale[pitchIdx];
-
-              notes.push({
-                pitch: pitch,
-                startTime: timeOffset,
-                duration: rowDurationSec * 1.1,
-                velocity: 0.88,
-                channel: charIdx % 2
-              });
+              const colIdx = centerKeyIdx + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                const pitch = availableKeys[colIdx];
+                notes.push({
+                  pitch: pitch,
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.88,
+                  channel: charIdx % 2,
+                  char: ch.toUpperCase(),
+                  charColor: charColor,
+                  color: charColor
+                });
+              }
             }
           }
         }
+      });
+    } else if (rawMode === 'banner') {
+      // Single Wide Banner across keys
+      generateSingleLine(trimmed, 0.5, 0);
+    } else {
+      // Cascade / Multi-line mode:
+      let lines = [];
+      if (trimmed.includes('\n')) {
+        lines = trimmed.split(/\n+/).map(l => l.trim()).filter(Boolean);
+      } else if (trimmed.includes(' ')) {
+        // Multi-word phrase: e.g. "HAPPY BIRTHDAY" -> "HAPPY", "BIRTHDAY"
+        lines = trimmed.split(/\s+/).filter(Boolean);
+      } else {
+        lines = [trimmed];
+      }
+
+      let currentTime = 0.5;
+      const lineGapSec = options.lineGapSec || 0.65; // gap between cascading lines
+
+      lines.forEach((lineText, lineIdx) => {
+        const lineDuration = generateSingleLine(lineText, currentTime, lineIdx);
+        currentTime += lineDuration + lineGapSec;
       });
     }
 
@@ -500,35 +1578,47 @@ class PatternGenerator {
   }
 
   /**
-   * Generates a sequence of shapes (Heart, Star, Smiley) with sound
+   * Generates a sequence of shapes (Heart, Star, Smiley) with sound and colors
+   * Defaults to C Major white keys
    */
-  static generateShapeParade(shapes = ['HEART', 'SMILEY', 'STAR', 'NOTE']) {
-    const scale = SCALES.pentatonic;
-    const centerIdx = Math.floor(scale.length / 2) - 2;
+  static generateShapeParade(shapes = ['HEART', 'SMILEY', 'STAR', 'NOTE'], options = {}) {
+    const fontName = options.font || 'spectrum';
+    const font = PatternGenerator.getFont(fontName);
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
     const notes = [];
     const shapeInterval = 2.4;
-    const rowDurationSec = 0.18;
+    const rowDurationSec = 0.16;
+    const centerKeyIdx = Math.floor(totalKeys / 2) - 3;
 
     shapes.forEach((shapeKey, shapeIdx) => {
-      const matrix = FONT_5X7[shapeKey];
+      const matrix = font[shapeKey] || FONT_SPECTRUM_8X8[shapeKey];
       if (!matrix) return;
       const startTime = 0.6 + shapeIdx * shapeInterval;
       const totalRows = matrix.length;
+      const charWidth = matrix[0] ? matrix[0].length : 6;
+      const shapeColor = getCharacterColor(shapeKey);
 
       for (let r = 0; r < totalRows; r++) {
         const rowStr = matrix[r];
         const timeOffset = startTime + (totalRows - 1 - r) * rowDurationSec;
 
-        for (let c = 0; c < 5; c++) {
+        for (let c = 0; c < charWidth; c++) {
           if (rowStr[c] === '1') {
-            const pitchIdx = Math.min(scale.length - 1, Math.max(0, centerIdx + c));
-            notes.push({
-              pitch: scale[pitchIdx],
-              startTime: timeOffset,
-              duration: rowDurationSec * 1.15,
-              velocity: 0.85,
-              channel: shapeIdx % 2
-            });
+            const colIdx = centerKeyIdx + c;
+            if (colIdx >= 0 && colIdx < totalKeys) {
+              notes.push({
+                pitch: availableKeys[colIdx],
+                startTime: timeOffset,
+                duration: rowDurationSec * 1.15,
+                velocity: 0.85,
+                channel: shapeIdx % 2,
+                char: shapeKey,
+                charColor: shapeColor,
+                color: shapeColor
+              });
+            }
           }
         }
       }
@@ -539,76 +1629,55 @@ class PatternGenerator {
 
   /**
    * Counting Numbers: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+   * centered across keyboard with Sinclair Spectrum 8x8 font and C Major white keys
    */
-  static generateCountingNumbers(countTo = 10) {
-    const scale = SCALES.major;
+  static generateCountingNumbers(countTo = 10, options = {}) {
+    const fontName = options.font || 'spectrum';
+    const font = PatternGenerator.getFont(fontName);
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
     const notes = [];
     const stepDuration = 1.9;
-    const rowDurationSec = 0.17;
+    const rowDurationSec = 0.14;
 
     for (let num = 1; num <= countTo; num++) {
       const str = num.toString();
       const startTime = 0.5 + (num - 1) * stepDuration;
+      const numDigits = str.length;
+      const digitWidth = 6;
+      const totalColumns = numDigits * digitWidth + (numDigits - 1);
 
-      // Base pitch rises with each number so Henry hears counting up!
-      const basePitchIdx = Math.min(scale.length - 10, (num - 1) % 8);
+      const centerKeyIdx = Math.floor(totalKeys / 2);
+      const startKeyIdx = Math.max(0, centerKeyIdx - Math.floor(totalColumns / 2));
 
-      if (str.length === 1) {
-        const matrix = FONT_5X7[str];
-        if (!matrix) continue;
+      for (let dIdx = 0; dIdx < numDigits; dIdx++) {
+        const d = str[dIdx];
+        const matrix = font[d] || font['0'];
+        const digitBaseCol = startKeyIdx + dIdx * (digitWidth + 1);
+        const digitColor = getCharacterColor(d);
         const totalRows = matrix.length;
+        const charW = matrix[0] ? matrix[0].length : digitWidth;
 
         for (let r = 0; r < totalRows; r++) {
           const rowStr = matrix[r];
           const timeOffset = startTime + (totalRows - 1 - r) * rowDurationSec;
 
-          for (let c = 0; c < 5; c++) {
+          for (let c = 0; c < charW; c++) {
             if (rowStr[c] === '1') {
-              const pitchIdx = Math.min(scale.length - 1, basePitchIdx + c + 3);
-              notes.push({
-                pitch: scale[pitchIdx],
-                startTime: timeOffset,
-                duration: rowDurationSec * 1.15,
-                velocity: 0.85,
-                channel: (num % 2)
-              });
-            }
-          }
-        }
-      } else {
-        // Two digit numbers (e.g. 10)
-        const d1 = str[0];
-        const d2 = str[1];
-        const m1 = FONT_5X7[d1];
-        const m2 = FONT_5X7[d2];
-        const totalRows = 7;
-
-        for (let r = 0; r < totalRows; r++) {
-          const timeOffset = startTime + (totalRows - 1 - r) * rowDurationSec;
-          // Digit 1
-          for (let c = 0; c < 5; c++) {
-            if (m1[r][c] === '1') {
-              const pitchIdx = Math.min(scale.length - 1, basePitchIdx + c);
-              notes.push({
-                pitch: scale[pitchIdx],
-                startTime: timeOffset,
-                duration: rowDurationSec * 1.15,
-                velocity: 0.85,
-                channel: 0
-              });
-            }
-          }
-          // Digit 2
-          for (let c = 0; c < 5; c++) {
-            if (m2[r][c] === '1') {
-              const pitchIdx = Math.min(scale.length - 1, basePitchIdx + c + 6);
-              notes.push({
-                pitch: scale[pitchIdx],
-                startTime: timeOffset,
-                duration: rowDurationSec * 1.15,
-                velocity: 0.85,
-                channel: 1
-              });
+              const colIdx = digitBaseCol + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                notes.push({
+                  pitch: availableKeys[colIdx],
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.88,
+                  channel: dIdx % 2,
+                  char: d,
+                  charColor: digitColor,
+                  color: digitColor
+                });
+              }
             }
           }
         }
@@ -617,6 +1686,93 @@ class PatternGenerator {
 
     return notes;
   }
+
+  /**
+   * Generates a rapid retro arcade number stream from 1 up to 100,000
+   * centered across the keyboard with rainbow digit colors, Sinclair Spectrum font,
+   * and harmonious C Major white keys!
+   */
+  static generateNumberStream(options = {}) {
+    const fontName = options.font || 'spectrum';
+    const font = PatternGenerator.getFont(fontName);
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
+    const notes = [];
+    const rowDurationSec = options.rowDurationSec || 0.11;
+    const intervalSec = options.intervalSec || 0.35; // gap between numbers
+
+    // Progression of numbers from 1 to 100,000 highlighting the 10,720 showcase from the photo
+    const defaultNumbers = [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      15, 20, 50, 75, 100, 150, 250, 500, 750, 1000,
+      1500, 2500, 5000, 7500, 9999, 10000,
+      10500, 10700, 10718, 10719, 10720, 10721, 10722, 10725, 10750, 10800,
+      12500, 15000, 20000, 35000, 50000, 65000, 75000, 88888, 95000, 99999, 100000
+    ];
+
+    const numberList = options.numbers || defaultNumbers;
+    let currentTime = 0.5;
+
+    numberList.forEach((num, seqIdx) => {
+      const numStr = num.toString();
+      const numDigits = numStr.length;
+      const digitWidth = 6;
+      const totalColumns = numDigits * digitWidth + (numDigits - 1);
+
+      const centerKeyIdx = Math.floor(totalKeys / 2);
+      const startKeyIdx = Math.max(0, centerKeyIdx - Math.floor(totalColumns / 2));
+
+      for (let dIdx = 0; dIdx < numDigits; dIdx++) {
+        const digitChar = numStr[dIdx];
+        const matrix = font[digitChar] || font['0'];
+        const digitBaseCol = startKeyIdx + (dIdx * (digitWidth + 1));
+        const digitColor = getCharacterColor(digitChar);
+        const totalRows = matrix.length;
+        const charW = matrix[0] ? matrix[0].length : digitWidth;
+
+        for (let r = 0; r < totalRows; r++) {
+          const rowStr = matrix[r];
+          const timeOffset = currentTime + (totalRows - 1 - r) * rowDurationSec;
+
+          for (let c = 0; c < charW; c++) {
+            if (rowStr[c] === '1') {
+              const colIdx = digitBaseCol + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                notes.push({
+                  pitch: availableKeys[colIdx],
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.88,
+                  channel: dIdx % 2,
+                  char: digitChar,
+                  charColor: digitColor,
+                  color: digitColor
+                });
+              }
+            }
+          }
+        }
+      }
+
+      const totalNumHeightSec = 8 * rowDurationSec;
+      currentTime += totalNumHeightSec + intervalSec;
+    });
+
+    return notes;
+  }
 }
 
 window.PatternGenerator = PatternGenerator;
+window.FONT_SPECTRUM_8X8 = FONT_SPECTRUM_8X8;
+window.FONT_5X7 = FONT_5X7;
+window.DIGIT_COLORS = DIGIT_COLORS;
+window.LETTER_COLORS = LETTER_COLORS;
+window.WHITE_KEYS_88 = WHITE_KEYS_88;
+window.CHROMATIC_88 = CHROMATIC_88;
+window.PENTATONIC_88 = PENTATONIC_88;
+window.CHIMES_88 = CHIMES_88;
+window.SCALES = SCALES;
+window.getCharacterColor = getCharacterColor;
+
+

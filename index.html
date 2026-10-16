@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Henrysia — Visual Piano & Pattern Waterfall</title>
   <meta name="description" content="Visual piano waterfall visualizer and educational pattern player with realistic acoustic piano audio and MIDI generator for Henry.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300e5ff'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H6V5h2v8h2V5h2v8h2V5h2v12z'/></svg>">
 </head>
@@ -115,7 +118,9 @@
       <div class="desktop-selectors">
         <!-- Theme Selector -->
         <select id="themeSelect" class="select-control" title="Visual Colors">
-          <option value="classic" selected>Classic Emerald & Sapphire</option>
+          <option value="character" selected>🌈 Character Colors (Retro Rainbow)</option>
+          <option value="halloween">🎃 Spooky Halloween</option>
+          <option value="classic">Classic Emerald & Sapphire</option>
           <option value="rainbow">Rainbow Spectrum</option>
           <option value="neon">Cyberpunk Neon</option>
           <option value="gold">Golden Royalty</option>
@@ -142,6 +147,14 @@
           <option value="letter" selected>Labels: C4, D4</option>
           <option value="solfege">Labels: Do, Re, Mi</option>
           <option value="none">Labels: Off</option>
+        </select>
+
+        <!-- Musical Scale & Key Mode Selector -->
+        <select id="scaleSelect" class="select-control" title="Musical Scale & Key Mode">
+          <option value="whiteKeys" selected>🎹 C Major (White Keys)</option>
+          <option value="chromatic">All Keys (Chromatic)</option>
+          <option value="pentatonic">Pentatonic Bells</option>
+          <option value="chime">Glass Chimes</option>
         </select>
       </div>
 
@@ -183,12 +196,13 @@
 
       <div class="form-group">
         <label>Message or Numbers</label>
-        <input type="text" id="customTextInput" class="form-input" value="HENRY" maxlength="20" placeholder="e.g. HENRY or 12345">
+        <textarea id="customTextInput" class="form-input" rows="2" maxlength="50" placeholder="e.g. HAPPY BIRTHDAY or enter words on multiple lines" style="resize: vertical; min-height: 54px;">HAPPY BIRTHDAY</textarea>
         <div class="quick-tags">
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY\nBIRTHDAY'">HAPPY BIRTHDAY (2 Lines)</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY BIRTHDAY'">HAPPY BIRTHDAY (1 Line)</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='10720'">10720 (Arcade)</button>
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='1-100000'">1 to 100,000</button>
           <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HENRY'">HENRY</button>
-          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='12345'">1 2 3 4 5</button>
-          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY BIRTHDAY'">HAPPY BIRTHDAY</button>
-          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='SUPERSTAR'">SUPERSTAR</button>
           <button class="tag-btn" onclick="document.getElementById('customTextInput').value='ABC'">ABC</button>
         </div>
       </div>
@@ -196,18 +210,21 @@
       <div class="form-group">
         <label>Display Layout</label>
         <select id="customModeSelect" class="select-control">
-          <option value="banner" selected>Wide Banner (All letters across piano simultaneously)</option>
+          <option value="cascade" selected>Multi-Line Cascade (Happy on line 1, Birthday on line 2)</option>
+          <option value="banner">Wide Banner (All letters across 88 keys)</option>
           <option value="sequential">Sequential (One big letter at a time)</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Musical Harmony</label>
+        <label>Musical Scale & Keys</label>
         <select id="customScaleSelect" class="select-control">
-          <option value="pentatonic" selected>Celestial Pentatonic Bells (Melodic & Chime-like)</option>
-          <option value="major">Joyful Major Scale</option>
+          <option value="whiteKeys" selected>🎹 C Major (White Keys Only — Harmonious & Joyful)</option>
+          <option value="chromatic">All Keys (Chromatic 88)</option>
+          <option value="pentatonic">Celestial Pentatonic Bells</option>
           <option value="chime">Arpeggiated Glass Chimes</option>
         </select>
+        <div class="field-hint">C Major (White Keys Only) maps all visual notes exclusively to the 52 white keys.</div>
       </div>
 
       <div class="modal-actions">
@@ -245,7 +262,9 @@
       <div class="form-group">
         <label>🎨 Visual Waterfall Theme</label>
         <select id="modalThemeSelect" class="select-control">
-          <option value="classic" selected>Classic Emerald & Sapphire</option>
+          <option value="character" selected>🌈 Character Colors (Retro Rainbow)</option>
+          <option value="halloween">🎃 Spooky Halloween</option>
+          <option value="classic">Classic Emerald & Sapphire</option>
           <option value="rainbow">Rainbow Spectrum</option>
           <option value="neon">Cyberpunk Neon</option>
           <option value="gold">Golden Royalty</option>
@@ -280,6 +299,17 @@
           <option value="solfege">Solfège: Do, Re, Mi</option>
           <option value="none">Labels Off</option>
         </select>
+      </div>
+
+      <div class="form-group">
+        <label>🎹 Musical Scale & Key Mode</label>
+        <select id="modalScaleSelect" class="select-control">
+          <option value="whiteKeys" selected>🎹 C Major (White Keys Only — Harmonious)</option>
+          <option value="chromatic">All Keys (Chromatic 88)</option>
+          <option value="pentatonic">Celestial Pentatonic Bells</option>
+          <option value="chime">Glass Chimes</option>
+        </select>
+        <div class="field-hint">C Major (White Keys Only) plays pure natural notes on the 52 white keys.</div>
       </div>
 
       <div class="form-group">

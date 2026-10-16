@@ -24,7 +24,7 @@ class WaterfallEngine {
     this.lastFrameTime = performance.now();
 
     // Theme & styling
-    this.theme = 'classic'; // 'classic', 'rainbow', 'neon', 'gold'
+    this.theme = 'character'; // 'character', 'halloween', 'classic', 'rainbow', 'neon', 'gold'
     this.particles = [];
     this.activeNotePool = new Set();
 
@@ -38,6 +38,15 @@ class WaterfallEngine {
       '#ff3b30', '#ff9500', '#ffcc00', '#34c759',
       '#00c7be', '#30b0c7', '#007aff', '#5856d6',
       '#af52de', '#ff2d55', '#ff6482', '#ff85a2'
+    ];
+
+    this.halloweenPalette = [
+      '#ff7518', // Pumpkin Orange
+      '#a855f7', // Witch Purple
+      '#22c55e', // Slime Green
+      '#ef4444', // Blood Red
+      '#ff9f1c', // Jack-o-lantern Amber
+      '#ec4899'  // Ghostly Pink
     ];
 
     this.initResize();
@@ -96,14 +105,24 @@ class WaterfallEngine {
   }
 
   getNoteColor(note) {
-    if (this.theme === 'rainbow') {
+    if (this.theme === 'character') {
+      // Character Color Mode: Rainbow for 0-9 & unique color for letters A-Z
+      if (note.charColor) return note.charColor;
+      if (note.color) return note.color;
+      return this.rainbowPalette[note.pitch % 12];
+    } else if (this.theme === 'halloween') {
+      // Spooky Halloween Mode
+      return this.halloweenPalette[(note.pitch + (note.channel || 0)) % this.halloweenPalette.length];
+    } else if (this.theme === 'rainbow') {
+      if (note.charColor) return note.charColor;
       return this.rainbowPalette[note.pitch % 12];
     } else if (this.theme === 'neon') {
       return (note.channel === 1 || note.pitch < 60) ? '#ff0077' : '#00f0ff';
     } else if (this.theme === 'gold') {
       return (note.channel === 1 || note.pitch < 60) ? '#ffb300' : '#8c52ff';
     } else {
-      // Classic Visual Piano: Green for right hand, Blue for left hand
+      // Classic Visual Piano
+      if (note.charColor) return note.charColor;
       if (note.channel === 1 || note.pitch < 60) {
         return '#00b0ff'; // Sapphire Blue
       }
@@ -380,7 +399,12 @@ class WaterfallEngine {
   renderNoteBar(ctx, x, y, width, height, color, isStriking, note) {
     ctx.save();
 
-    const cornerRadius = Math.min(5, Math.min(width / 2, height / 2));
+    // Inset slightly to give discrete retro arcade block segment look (matching the photo)
+    const insetX = x + 0.5;
+    const insetY = y + 0.5;
+    const renderW = Math.max(3, width - 1);
+    const renderH = Math.max(3, height - 1);
+    const cornerRadius = Math.min(4, Math.min(renderW * 0.35, renderH * 0.35));
 
     // Glow aura around note bar (especially intense when striking)
     if (isStriking) {
@@ -388,32 +412,25 @@ class WaterfallEngine {
       ctx.shadowBlur = 18;
     } else {
       ctx.shadowColor = color;
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 5;
     }
 
-    // Gradient fill for 3D rounded pill note
-    const grad = ctx.createLinearGradient(x, y, x + width, y);
-    grad.addColorStop(0, color);
-    grad.addColorStop(0.3, '#ffffff'); // bright sheen
-    grad.addColorStop(0.7, color);
-    grad.addColorStop(1, '#000000');
-
-    // Rounded rectangle path
+    // Rounded rectangle path for arcade block note
     ctx.beginPath();
     if (ctx.roundRect) {
-      ctx.roundRect(x, y, width, height, [cornerRadius, cornerRadius, 2, 2]);
+      ctx.roundRect(insetX, insetY, renderW, renderH, cornerRadius);
     } else {
-      ctx.rect(x, y, width, height);
+      ctx.rect(insetX, insetY, renderW, renderH);
     }
     ctx.fillStyle = color;
     ctx.fill();
 
     // Top glossy highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.fillRect(x + 1, y, width - 2, Math.min(4, height));
+    ctx.fillStyle = isStriking ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.38)';
+    ctx.fillRect(insetX + 1, insetY, renderW - 2, Math.min(3, renderH * 0.35));
 
-    // Dark edge border
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    // Crisp arcade tile border (clean matrix segments as in photo)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
     ctx.lineWidth = 1;
     ctx.stroke();
 

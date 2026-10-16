@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
   --bg-primary: #080a0f;
@@ -10,6 +10,9 @@
   --accent-green: #00e676;
   --accent-magenta: #ff007f;
   --accent-gold: #ffb300;
+  --accent-halloween-orange: #ff7518;
+  --accent-halloween-purple: #a855f7;
+  --accent-halloween-green: #22c55e;
   --text-main: #f0f4f8;
   --text-muted: #8c9ba8;
   --radius-sm: 6px;
@@ -18,6 +21,7 @@
   --shadow-glow: 0 0 20px rgba(0, 229, 255, 0.25);
   --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.5);
   --transition-fast: 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --font-retro: 'Silkscreen', 'Press Start 2P', monospace;
 }
 
 * {
@@ -93,6 +97,13 @@ body {
 
 .brand-icon svg {
   fill: #0a0c10;
+}
+
+.brand-title {
+  font-family: var(--font-retro);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .brand-title span {

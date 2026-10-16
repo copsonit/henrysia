@@ -15,7 +15,7 @@ class SongLibrary {
           // Banner of H E N R Y across the keyboard + triumphant celebration
           const bannerNotes = PatternGenerator.generateTextNotes("HENRY", {
             mode: 'banner',
-            scale: 'pentatonic',
+            scale: 'whiteKeys',
             rowDurationSec: 0.22
           });
 
@@ -48,11 +48,120 @@ class SongLibrary {
         }
       },
       {
+        id: 'counter_100000',
+        title: "🔢 1 to 100,000 Number Stream (10,720 Arcade)",
+        category: 'Learning & Fun',
+        description: 'Rapid retro arcade number cascade from 1 to 100,000 featuring the iconic 10,720 showcase from the photo!',
+        getNotes: () => PatternGenerator.generateNumberStream()
+      },
+      {
+        id: 'happy_birthday_cascade',
+        title: "🎂 Happy Birthday (2-Line Cascade)",
+        category: 'Henry Special',
+        description: "Giant glowing 'HAPPY' on line 1, then 'BIRTHDAY' on line 2, followed by the celebration piano melody!",
+        getNotes: () => {
+          // Cascade HAPPY on line 1, then BIRTHDAY on line 2 centered across piano white keys
+          const textNotes = PatternGenerator.generateTextNotes("HAPPY BIRTHDAY", {
+            mode: 'cascade',
+            scale: 'whiteKeys',
+            rowDurationSec: 0.19,
+            lineGapSec: 0.65
+          });
+
+          // Follow with the joyful Happy Birthday celebration melody
+          const melodyStart = 4.8;
+          const beat = 0.38;
+          const birthdayMelody = [
+            // Happy birthday to you
+            { p: 60, d: 0.75 }, { p: 60, d: 0.25 }, { p: 62, d: 1 }, { p: 60, d: 1 }, { p: 65, d: 1 }, { p: 64, d: 2 },
+            // Happy birthday to you
+            { p: 60, d: 0.75 }, { p: 60, d: 0.25 }, { p: 62, d: 1 }, { p: 60, d: 1 }, { p: 67, d: 1 }, { p: 65, d: 2 },
+            // Happy birthday dear Henry
+            { p: 60, d: 0.75 }, { p: 60, d: 0.25 }, { p: 72, d: 1 }, { p: 69, d: 1 }, { p: 65, d: 1 }, { p: 64, d: 1 }, { p: 62, d: 2 },
+            // Happy birthday to you
+            { p: 70, d: 0.75 }, { p: 70, d: 0.25 }, { p: 69, d: 1 }, { p: 65, d: 1 }, { p: 67, d: 1 }, { p: 65, d: 2 }
+          ];
+
+          let t = melodyStart;
+          const melodyNotes = [];
+          birthdayMelody.forEach((m, idx) => {
+            melodyNotes.push({
+              pitch: m.p,
+              startTime: t,
+              duration: m.d * beat * 0.9,
+              velocity: 0.9,
+              channel: idx % 2,
+              charColor: idx % 2 === 0 ? '#ffea00' : '#ff3b56'
+            });
+            // Left hand bass accompaniment on primary chords
+            if (m.d >= 1) {
+              melodyNotes.push({
+                pitch: m.p > 65 ? 41 : 48,
+                startTime: t,
+                duration: m.d * beat * 0.9,
+                velocity: 0.75,
+                channel: 1,
+                charColor: '#00e5ff'
+              });
+            }
+            t += m.d * beat;
+          });
+
+          return [...textNotes, ...melodyNotes];
+        }
+      },
+      {
         id: 'counting_10',
         title: "🔢 Counting Numbers 1 to 10",
         category: 'Learning & Fun',
         description: 'Giant glowing numbers 1 through 10 scrolling down with rising musical pitches!',
-        getNotes: () => PatternGenerator.generateCountingNumbers(10)
+        getNotes: () => PatternGenerator.generateCountingNumbers(10, { scale: 'whiteKeys' })
+      },
+      {
+        id: 'halloween_spooky',
+        title: "🎃 Spooky Halloween Night",
+        category: 'Seasonal & Fun',
+        description: 'Eerie haunted piano melody with pumpkin orange, witch purple, and slime green falling notes!',
+        getNotes: () => {
+          const notes = [];
+          // Spooky minor melody in D minor (D4, E4, F4, G4, A4, Bb4, C#5, D5)
+          const melody = [
+            { pitch: 62, dur: 0.35 }, { pitch: 64, dur: 0.35 }, { pitch: 65, dur: 0.35 }, { pitch: 67, dur: 0.35 },
+            { pitch: 69, dur: 0.5 },  { pitch: 65, dur: 0.5 },  { pitch: 69, dur: 0.8 },
+            { pitch: 68, dur: 0.35 }, { pitch: 64, dur: 0.35 }, { pitch: 68, dur: 0.8 },
+            { pitch: 67, dur: 0.35 }, { pitch: 63, dur: 0.35 }, { pitch: 67, dur: 0.8 },
+            // Staccato mystery climb
+            { pitch: 62, dur: 0.25 }, { pitch: 65, dur: 0.25 }, { pitch: 69, dur: 0.25 }, { pitch: 74, dur: 0.4 },
+            { pitch: 73, dur: 0.3 },  { pitch: 70, dur: 0.3 },  { pitch: 69, dur: 0.6 },
+            // Ghostly low bass bells
+            { pitch: 38, dur: 1.2 },  { pitch: 45, dur: 1.2 },  { pitch: 50, dur: 1.5 }
+          ];
+
+          let t = 0.5;
+          melody.forEach((n, idx) => {
+            notes.push({
+              pitch: n.pitch,
+              startTime: t,
+              duration: n.dur,
+              velocity: 0.9,
+              channel: idx % 2,
+              charColor: idx % 3 === 0 ? '#ff7518' : (idx % 3 === 1 ? '#a855f7' : '#22c55e')
+            });
+            // Accompanying eerie drone bass every few steps
+            if (idx % 3 === 0) {
+              notes.push({
+                pitch: 38 + (idx % 2) * 5,
+                startTime: t,
+                duration: 1.1,
+                velocity: 0.75,
+                channel: 1,
+                charColor: '#ff7518'
+              });
+            }
+            t += n.dur + 0.12;
+          });
+          return notes;
+        }
       },
       {
         id: 'alphabet_song',
@@ -62,7 +171,7 @@ class SongLibrary {
         getNotes: () => {
           return PatternGenerator.generateTextNotes("ABCDEFG HIJKLMN OPQRSTU VWXYZ", {
             mode: 'sequential',
-            scale: 'major',
+            scale: 'whiteKeys',
             charSpacingSec: 1.4,
             rowDurationSec: 0.14
           });
@@ -73,7 +182,7 @@ class SongLibrary {
         title: "💖 Shapes & Emoji Parade",
         category: 'Learning & Fun',
         description: 'Cascading hearts, smiley faces, and stars falling into the piano keys!',
-        getNotes: () => PatternGenerator.generateShapeParade(['HEART', 'SMILEY', 'STAR', 'NOTE', 'HEART', 'STAR'])
+        getNotes: () => PatternGenerator.generateShapeParade(['HEART', 'SMILEY', 'STAR', 'NOTE', 'HEART', 'STAR'], { scale: 'whiteKeys' })
       },
       {
         id: 'rainbow_cascade',

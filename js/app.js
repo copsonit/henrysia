@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const soundSelect = document.getElementById('soundSelect');
   const rangeSelect = document.getElementById('rangeSelect');
   const labelsSelect = document.getElementById('labelsSelect');
+  const scaleSelect = document.getElementById('scaleSelect');
   const volumeSlider = document.getElementById('volumeSlider');
   const downloadMidiBtn = document.getElementById('downloadMidiBtn');
   const midiFileInput = document.getElementById('midiFileInput');
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalRangeSelect = document.getElementById('modalRangeSelect');
   const modalSoundSelect = document.getElementById('modalSoundSelect');
   const modalLabelsSelect = document.getElementById('modalLabelsSelect');
+  const modalScaleSelect = document.getElementById('modalScaleSelect');
   const modalSpeedSelect = document.getElementById('modalSpeedSelect');
   const fullscreenBtn = document.getElementById('fullscreenBtn');
   const modalFullscreenBtn = document.getElementById('modalFullscreenBtn');
@@ -190,6 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
     piano.labelMode = e.target.value;
   });
 
+  if (scaleSelect) {
+    scaleSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (modalScaleSelect) modalScaleSelect.value = val;
+      if (customScaleSelect) customScaleSelect.value = val;
+    });
+  }
+
   volumeSlider.addEventListener('input', (e) => {
     audio.setVolume(parseFloat(e.target.value));
   });
@@ -222,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalRangeSelect) modalRangeSelect.value = rangeSelect.value;
       if (modalSoundSelect) modalSoundSelect.value = soundSelect.value;
       if (modalLabelsSelect) modalLabelsSelect.value = labelsSelect.value;
+      if (modalScaleSelect && scaleSelect) modalScaleSelect.value = scaleSelect.value;
       if (modalSpeedSelect) modalSpeedSelect.value = speedSelect.value;
       settingsModal.classList.add('active');
     });
@@ -263,6 +274,20 @@ document.addEventListener('DOMContentLoaded', () => {
     modalLabelsSelect.addEventListener('change', (e) => {
       labelsSelect.value = e.target.value;
       piano.labelMode = e.target.value;
+    });
+  }
+  if (modalScaleSelect) {
+    modalScaleSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (scaleSelect) scaleSelect.value = val;
+      if (customScaleSelect) customScaleSelect.value = val;
+    });
+  }
+  if (customScaleSelect) {
+    customScaleSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (scaleSelect) scaleSelect.value = val;
+      if (modalScaleSelect) modalScaleSelect.value = val;
     });
   }
   if (modalSpeedSelect) {
@@ -354,13 +379,18 @@ document.addEventListener('DOMContentLoaded', () => {
   applyCustomPatternBtn.addEventListener('click', () => {
     const text = customTextInput.value.trim() || 'HENRY';
     const mode = customModeSelect.value;
-    const scale = customScaleSelect.value;
+    const scale = customScaleSelect.value || 'whiteKeys';
 
-    const notes = PatternGenerator.generateTextNotes(text, {
-      mode,
-      scale,
-      rowDurationSec: mode === 'banner' ? 0.22 : 0.16
-    });
+    let notes;
+    if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
+      notes = PatternGenerator.generateNumberStream({ scale });
+    } else {
+      notes = PatternGenerator.generateTextNotes(text, {
+        mode,
+        scale,
+        rowDurationSec: mode === 'banner' ? 0.22 : 0.16
+      });
+    }
 
     currentSongTitle = `Pattern: ${text}`;
     loadNotes(notes, `✨ ${currentSongTitle}`);
@@ -373,12 +403,17 @@ document.addEventListener('DOMContentLoaded', () => {
   downloadCustomMidiBtn.addEventListener('click', () => {
     const text = customTextInput.value.trim() || 'HENRY';
     const mode = customModeSelect.value;
-    const scale = customScaleSelect.value;
+    const scale = customScaleSelect.value || 'whiteKeys';
 
-    const notes = PatternGenerator.generateTextNotes(text, {
-      mode,
-      scale
-    });
+    let notes;
+    if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
+      notes = PatternGenerator.generateNumberStream({ scale });
+    } else {
+      notes = PatternGenerator.generateTextNotes(text, {
+        mode,
+        scale
+      });
+    }
 
     const filename = `pattern_${text.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.mid`;
     MidiWriter.downloadMidi(notes, filename, {
