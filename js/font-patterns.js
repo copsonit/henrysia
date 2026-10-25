@@ -1789,9 +1789,12 @@ class PatternGenerator {
     const availableKeys = PatternGenerator.getKeysForScale(scale);
     const totalKeys = availableKeys.length;
     const rowDurationSec = options.rowDurationSec || 0.10;
-    const stepRows = options.stepRows || 4; // Half a character up for each step (4 rows out of 8)
-    const stepAdvanceSec = stepRows * rowDurationSec;
-    const colStep = options.colStep || 7; // Horizontal step in keys/columns
+    const totalRows = 8;
+    const charHeightSec = totalRows * rowDurationSec;
+    const stepRows = options.stepRows || 4; // Half a character up for next number (4 rows out of 8)
+    const halfCharSec = stepRows * rowDurationSec;
+    const clearMarginSec = 2 * rowDurationSec; // 2 rows buffer so numbers never visually collide or touch
+    const colFreeTime = new Float32Array(totalKeys);
     const notes = [];
 
     const numbers = [];
@@ -1804,7 +1807,7 @@ class PatternGenerator {
     // 10,000 to 100,000 with increment of 1,000
     for (let i = 11000; i <= 100000; i += 1000) numbers.push(i);
 
-    let currentTime = options.startTime || 0.5;
+    let prevNumberTime = (options.startTime || 0.5) - halfCharSec;
     let currentCol = 0;
     let dir = 1; // 1 = moving right, -1 = moving left
 
@@ -1815,21 +1818,36 @@ class PatternGenerator {
       const totalColumns = numDigits * digitWidth + (numDigits - 1);
       const maxStartCol = Math.max(0, totalKeys - totalColumns);
 
-      // Position for this number
+      // Horizontal position for this number
       const startKeyIdx = Math.max(0, Math.min(maxStartCol, Math.round(currentCol)));
+      const endKeyIdx = startKeyIdx + totalColumns - 1;
 
+      // Base timing: next number steps up half a character (0.5 character advance)
+      const candidateTime = prevNumberTime + halfCharSec;
+
+      // Check if any occupied columns are still busy from a previous number
+      let maxBusyTime = 0;
+      for (let c = startKeyIdx; c <= endKeyIdx; c++) {
+        if (c >= 0 && c < totalKeys && colFreeTime[c] > maxBusyTime) {
+          maxBusyTime = colFreeTime[c];
+        }
+      }
+
+      // If columns would overlap with an active number, delay in time until clear (+0.5-1 char gap)
+      const numberTime = Math.max(candidateTime, maxBusyTime);
+
+      // Render all digits of this number at the EXACT SAME time
       for (let dIdx = 0; dIdx < numDigits; dIdx++) {
         const digitChar = numStr[dIdx];
         const matrix = font[digitChar] || font['0'];
         const digitBaseCol = startKeyIdx + (dIdx * (digitWidth + 1));
         const digitColor = getCharacterColor(digitChar);
-        const totalRows = matrix.length;
         const charW = matrix[0] ? matrix[0].length : digitWidth;
 
         for (let r = 0; r < totalRows; r++) {
           const rowStr = matrix[r];
-          // Bottom row hits keys first, top row hits last
-          const timeOffset = currentTime + (totalRows - 1 - r) * rowDurationSec;
+          // Bottom row hits keys first at numberTime, top row hits last
+          const timeOffset = numberTime + (totalRows - 1 - r) * rowDurationSec;
 
           for (let c = 0; c < charW; c++) {
             if (rowStr[c] === '1') {
@@ -1852,10 +1870,17 @@ class PatternGenerator {
         }
       }
 
-      // Half a character up for each step
-      currentTime += stepAdvanceSec;
+      // Mark columns as busy until this number has completely finished + clear margin
+      const finishTime = numberTime + charHeightSec + clearMarginSec;
+      for (let c = startKeyIdx; c <= endKeyIdx; c++) {
+        if (c >= 0 && c < totalKeys) {
+          colFreeTime[c] = finishTime;
+        }
+      }
+      prevNumberTime = numberTime;
 
-      // Zig-zag horizontally across the piano keys
+      // Step horizontally across the keyboard (spaced apart so adjacent numbers don't overlap)
+      const colStep = Math.max(8, totalColumns + 2);
       if (dir === 1) {
         if (currentCol + colStep >= maxStartCol) {
           currentCol = maxStartCol;
