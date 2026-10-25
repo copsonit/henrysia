@@ -1850,6 +1850,107 @@ class PatternGenerator {
 
     return notes;
   }
+
+  /**
+   * Generates complete 1 to 1,000 counting without any skips
+   * in giant 3D HD beveled gem digits spanning ~38-42 minutes (matching the PianoBit video).
+   */
+  static generateCounting1To1000(options = {}) {
+    const numbers = [];
+    for (let i = 1; i <= 1000; i++) {
+      numbers.push(i);
+    }
+    return PatternGenerator.generateHDNumbers(numbers, {
+      scale: options.scale || 'whiteKeys',
+      rowDurationSec: options.rowDurationSec || 0.09,
+      intervalSec: options.intervalSec || 0.40,
+      startTime: options.startTime || 0.6
+    });
+  }
+
+  /**
+   * Generates the powers of 2 binary progression sequence (2^1 = 2 up to 2^32 = 4,294,967,296)
+   * using compact retro arcade fonts (FONT_5X7 and FONT_4X7) so huge numbers fit across
+   * the keyboard without clipping.
+   */
+  static generatePowersOfTwo(options = {}) {
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
+    const rowDurationSec = options.rowDurationSec || 0.13;
+    const intervalSec = options.intervalSec || 0.45;
+    const toHex = window.hslToHex || ((h, s, l) => `hsl(${h}, ${s}%, ${l}%)`);
+    const notes = [];
+    let currentTime = options.startTime || 0.6;
+
+    // Powers of 2 from 2^1 (2) up to 2^32 (4,294,967,296)
+    const powers = [];
+    let currentVal = 2;
+    for (let exp = 1; exp <= 32; exp++) {
+      powers.push({ exp, val: currentVal });
+      currentVal *= 2;
+    }
+
+    powers.forEach(({ exp, val }) => {
+      const numStr = val.toString();
+      const numDigits = numStr.length;
+
+      // Select font based on digit count: FONT_5X7 for <= 7 digits, FONT_4X7 for 8+ digits
+      const useCompact = numDigits >= 8;
+      const font = useCompact ? FONT_4X7 : FONT_5X7;
+      const digitWidth = useCompact ? 4 : 5;
+      const gap = useCompact ? 1 : (numDigits <= 4 ? 2 : 1);
+
+      const totalColumns = numDigits * digitWidth + (numDigits - 1) * gap;
+      const centerKeyIdx = Math.floor(totalKeys / 2);
+      const startKeyIdx = Math.max(0, centerKeyIdx - Math.floor(totalColumns / 2));
+
+      for (let dIdx = 0; dIdx < numDigits; dIdx++) {
+        const d = numStr[dIdx];
+        const matrix = font[d] || font['0'];
+        const totalRows = matrix.length;
+        const charW = matrix[0] ? matrix[0].length : digitWidth;
+        const digitBaseCol = startKeyIdx + dIdx * (digitWidth + gap);
+
+        for (let r = 0; r < totalRows; r++) {
+          const rowStr = matrix[r];
+          // Bottom row hits keys first
+          const timeOffset = currentTime + (totalRows - 1 - r) * rowDurationSec;
+
+          for (let c = 0; c < charW; c++) {
+            if (rowStr[c] === '1') {
+              const colIdx = digitBaseCol + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                const pitch = availableKeys[colIdx];
+                const colRatio = colIdx / Math.max(1, totalKeys - 1);
+                const hue = Math.round(18 + colRatio * 267);
+                const color = toHex(hue, 100, 52);
+
+                notes.push({
+                  pitch: pitch,
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.88,
+                  channel: exp % 2,
+                  char: d,
+                  charColor: color,
+                  color: color,
+                  isPowerOfTwo: true,
+                  exp: exp,
+                  val: val
+                });
+              }
+            }
+          }
+        }
+      }
+
+      const totalNumHeightSec = 7 * rowDurationSec;
+      currentTime += totalNumHeightSec + intervalSec;
+    });
+
+    return notes;
+  }
 }
 
 // ============================================================================
@@ -2108,9 +2209,106 @@ const FONT_HD_GEMS = {
   ]
 };
 
+// ============================================================================
+// ULTRA-COMPACT 4x7 MATRIX (For large numbers with 8+ digits, e.g. Powers of 2)
+// ============================================================================
+const FONT_4X7 = {
+  '0': [
+    "1111",
+    "1  1",
+    "1  1",
+    "1  1",
+    "1  1",
+    "1  1",
+    "1111"
+  ],
+  '1': [
+    " 11 ",
+    "  1 ",
+    "  1 ",
+    "  1 ",
+    "  1 ",
+    "  1 ",
+    " 111"
+  ],
+  '2': [
+    "1111",
+    "   1",
+    "   1",
+    "1111",
+    "1   ",
+    "1   ",
+    "1111"
+  ],
+  '3': [
+    "1111",
+    "   1",
+    "   1",
+    "1111",
+    "   1",
+    "   1",
+    "1111"
+  ],
+  '4': [
+    "1  1",
+    "1  1",
+    "1  1",
+    "1111",
+    "   1",
+    "   1",
+    "   1"
+  ],
+  '5': [
+    "1111",
+    "1   ",
+    "1   ",
+    "1111",
+    "   1",
+    "   1",
+    "1111"
+  ],
+  '6': [
+    "1111",
+    "1   ",
+    "1   ",
+    "1111",
+    "1  1",
+    "1  1",
+    "1111"
+  ],
+  '7': [
+    "1111",
+    "   1",
+    "   1",
+    "  1 ",
+    "  1 ",
+    " 1  ",
+    " 1  "
+  ],
+  '8': [
+    "1111",
+    "1  1",
+    "1  1",
+    "1111",
+    "1  1",
+    "1  1",
+    "1111"
+  ],
+  '9': [
+    "1111",
+    "1  1",
+    "1  1",
+    "1111",
+    "   1",
+    "   1",
+    "1111"
+  ]
+};
+
 window.PatternGenerator = PatternGenerator;
 window.FONT_SPECTRUM_8X8 = FONT_SPECTRUM_8X8;
 window.FONT_5X7 = FONT_5X7;
+window.FONT_4X7 = FONT_4X7;
 window.FONT_HD_GEMS = FONT_HD_GEMS;
 window.DIGIT_COLORS = DIGIT_COLORS;
 window.LETTER_COLORS = LETTER_COLORS;

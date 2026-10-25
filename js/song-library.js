@@ -59,6 +59,20 @@ class SongLibrary {
         })
       },
       {
+        id: 'numbers_1_to_1000',
+        title: "🔢 1 to 1,000 Unbroken HD Gem Stream (40 Min)",
+        category: 'Learning & Fun',
+        description: 'Complete uninterrupted counting from 1 to 1,000 in giant 3D beveled gem digits with rainbow keys and particle drops!',
+        getNotes: () => PatternGenerator.generateCounting1To1000()
+      },
+      {
+        id: 'powers_of_two',
+        title: "⚡ Powers of 2 Binary Stream (2 to 4.29 Billion)",
+        category: 'Learning & Fun',
+        description: 'Exponential doubling progression from 2^1 (2) up to 2^32 (4,294,967,296) in compact retro arcade font with rainbow waterfall!',
+        getNotes: () => PatternGenerator.generatePowersOfTwo()
+      },
+      {
         id: 'counter_100000',
         title: "🔢 1 to 100,000 Number Stream (10,720 Arcade)",
         category: 'Learning & Fun',

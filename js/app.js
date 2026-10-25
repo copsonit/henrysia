@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalFullscreenBtn = document.getElementById('modalFullscreenBtn');
 
   // Current Song Metadata
+  let currentSongId = 'hd_gem_123_456_789';
   let currentSongTitle = "Henry's Grand Showcase";
   let currentNotes = [];
 
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const song = librarySongs.find(s => s.id === songId);
     if (!song) return;
 
+    currentSongId = songId;
     currentSongTitle = song.title.replace(/^[^\w\s]+/, '').trim();
     currentNotes = song.getNotes();
     loadNotes(currentNotes, currentSongTitle);
@@ -166,6 +168,44 @@ document.addEventListener('DOMContentLoaded', () => {
     waterfall.setTime(t);
     timeCurrentEl.textContent = formatTime(t);
   });
+
+  // Quick direct jump to number (e.g. 1-1000 or specific power)
+  const jumpNumberInput = document.getElementById('jumpNumberInput');
+  const jumpNumberBtn = document.getElementById('jumpNumberBtn');
+
+  function jumpToNumber() {
+    if (!jumpNumberInput) return;
+    const val = parseInt(jumpNumberInput.value, 10);
+    if (isNaN(val) || val < 1) return;
+
+    if (currentSongId === 'numbers_1_to_1000') {
+      const clamped = Math.max(1, Math.min(1000, val));
+      const targetTime = Math.max(0, 0.6 + (clamped - 1) * 2.29);
+      waterfall.setTime(targetTime);
+      updateTimelineUI();
+    } else if (currentSongId === 'powers_of_two') {
+      const targetNote = currentNotes.find(n => n.val === val || (n.exp !== undefined && n.exp === val));
+      if (targetNote) {
+        waterfall.setTime(Math.max(0, targetNote.startTime - 0.2));
+        updateTimelineUI();
+      }
+    } else {
+      const targetNote = currentNotes.find(n => n.val === val || (n.char && parseInt(n.char, 10) === val));
+      if (targetNote) {
+        waterfall.setTime(Math.max(0, targetNote.startTime - 0.2));
+        updateTimelineUI();
+      }
+    }
+  }
+
+  if (jumpNumberBtn && jumpNumberInput) {
+    jumpNumberBtn.addEventListener('click', jumpToNumber);
+    jumpNumberInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        jumpToNumber();
+      }
+    });
+  }
 
   speedSelect.addEventListener('change', (e) => {
     waterfall.playbackRate = parseFloat(e.target.value);
@@ -412,7 +452,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const scale = customScaleSelect.value || 'whiteKeys';
 
     let notes;
-    if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
+    const upper = text.toUpperCase();
+    if (upper.includes('POWERS') || upper.includes('POWER OF 2') || upper === '2^N' || upper === '2^32') {
+      notes = PatternGenerator.generatePowersOfTwo({ scale });
+    } else if (text === '1-1000' || text === '1 to 1,000' || text === '1 to 1000' || text === '1000') {
+      notes = PatternGenerator.generateCounting1To1000({ scale });
+    } else if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
       notes = PatternGenerator.generateNumberStream({ scale });
     } else if (/^[\d\s,]+$/.test(text)) {
       const nums = text.split(/[\s,]+/).filter(Boolean).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
@@ -439,7 +484,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const scale = customScaleSelect.value || 'whiteKeys';
 
     let notes;
-    if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
+    const upper = text.toUpperCase();
+    if (upper.includes('POWERS') || upper.includes('POWER OF 2') || upper === '2^N' || upper === '2^32') {
+      notes = PatternGenerator.generatePowersOfTwo({ scale });
+    } else if (text === '1-1000' || text === '1 to 1,000' || text === '1 to 1000' || text === '1000') {
+      notes = PatternGenerator.generateCounting1To1000({ scale });
+    } else if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
       notes = PatternGenerator.generateNumberStream({ scale });
     } else if (/^[\d\s,]+$/.test(text)) {
       const nums = text.split(/[\s,]+/).filter(Boolean).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
