@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimelineUI();
       }
     } else {
-      const targetNote = currentNotes.find(n => n.val === val || (n.char && parseInt(n.char, 10) === val));
+      const targetNote = currentNotes.find(n => n.num === val || n.val === val || (n.char && parseInt(n.char, 10) === val));
       if (targetNote) {
         waterfall.setTime(Math.max(0, targetNote.startTime - 0.2));
         updateTimelineUI();
@@ -455,6 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const upper = text.toUpperCase();
     if (upper.includes('POWERS') || upper.includes('POWER OF 2') || upper === '2^N' || upper === '2^32') {
       notes = PatternGenerator.generatePowersOfTwo({ scale });
+    } else if (upper.includes('STEP') || upper.includes('STAGGER') || upper.includes('ZIG')) {
+      notes = PatternGenerator.generateSteppedNumberStream({ scale });
     } else if (text === '1-1000' || text === '1 to 1,000' || text === '1 to 1000' || text === '1000') {
       notes = PatternGenerator.generateCounting1To1000({ scale });
     } else if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
@@ -487,6 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const upper = text.toUpperCase();
     if (upper.includes('POWERS') || upper.includes('POWER OF 2') || upper === '2^N' || upper === '2^32') {
       notes = PatternGenerator.generatePowersOfTwo({ scale });
+    } else if (upper.includes('STEP') || upper.includes('STAGGER') || upper.includes('ZIG')) {
+      notes = PatternGenerator.generateSteppedNumberStream({ scale });
     } else if (text === '1-1000' || text === '1 to 1,000' || text === '1 to 1000' || text === '1000') {
       notes = PatternGenerator.generateCounting1To1000({ scale });
     } else if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
@@ -690,8 +694,11 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(renderLoop);
   }
 
-  // Initial song load: 💎 123 456 789 HD Gem Showcase (PianoBit Aesthetic)
-  songSelect.value = 'hd_gem_123_456_789';
-  loadSongById('hd_gem_123_456_789');
+  // Initial song load: support ?song= URL parameter (e.g. ?song=stepped_counting_100k)
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestedSong = urlParams.get('song');
+  const songToLoad = (requestedSong && librarySongs.some(s => s.id === requestedSong)) ? requestedSong : 'hd_gem_123_456_789';
+  songSelect.value = songToLoad;
+  loadSongById(songToLoad);
   requestAnimationFrame(renderLoop);
 });

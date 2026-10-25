@@ -1747,7 +1747,8 @@ class PatternGenerator {
                   channel: dIdx % 2,
                   char: digitChar,
                   charColor: digitColor,
-                  color: digitColor
+                  color: digitColor,
+                  num: num
                 });
               }
             }
@@ -1758,6 +1759,122 @@ class PatternGenerator {
       const totalNumHeightSec = 8 * rowDurationSec;
       currentTime += totalNumHeightSec + intervalSec;
     });
+
+    return notes;
+  }
+
+  /**
+   * Generates a stepped counting pattern from 1 up to 100,000 using the original Sinclair Spectrum 8x8 font:
+   * - 1 to 100 with increment of 1 (1, 2, ..., 100)
+   * - 100 to 1,000 with increment of 10 (110, 120, ..., 1000)
+   * - 1,000 to 10,000 with increment of 100 (1100, 1200, ..., 10000)
+   * - 10,000 to 100,000 with increment of 1,000 (11000, 12000, ..., 100000)
+   */
+  /**
+   * Generates a stepped counting pattern from 1 up to 100,000 using the original Sinclair Spectrum 8x8 font:
+   * - 1 to 100 with increment of 1 (1, 2, ..., 100)
+   * - 100 to 1,000 with increment of 10 (110, 120, ..., 1000)
+   * - 1,000 to 10,000 with increment of 100 (1100, 1200, ..., 10000)
+   * - 10,000 to 100,000 with increment of 1,000 (11000, 12000, ..., 100000)
+   *
+   * Staggered diagonal zig-zag animation:
+   * - Each step advances time by half a character up (4 rows out of 8)
+   * - Horizontally steps across the keyboard from left to right with spacing (1, 2 higher up to the right, 3 higher etc),
+   *   reaches the right edge, and zig-zags back to the left!
+   */
+  static generateSteppedNumberStream(options = {}) {
+    const fontName = options.font || 'spectrum';
+    const font = PatternGenerator.getFont(fontName);
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
+    const rowDurationSec = options.rowDurationSec || 0.10;
+    const stepRows = options.stepRows || 4; // Half a character up for each step (4 rows out of 8)
+    const stepAdvanceSec = stepRows * rowDurationSec;
+    const colStep = options.colStep || 7; // Horizontal step in keys/columns
+    const notes = [];
+
+    const numbers = [];
+    // 1 to 100 with increment of 1
+    for (let i = 1; i <= 100; i += 1) numbers.push(i);
+    // 100 to 1,000 with increment of 10
+    for (let i = 110; i <= 1000; i += 10) numbers.push(i);
+    // 1,000 to 10,000 with increment of 100
+    for (let i = 1100; i <= 10000; i += 100) numbers.push(i);
+    // 10,000 to 100,000 with increment of 1,000
+    for (let i = 11000; i <= 100000; i += 1000) numbers.push(i);
+
+    let currentTime = options.startTime || 0.5;
+    let currentCol = 0;
+    let dir = 1; // 1 = moving right, -1 = moving left
+
+    numbers.forEach((num) => {
+      const numStr = num.toString();
+      const numDigits = numStr.length;
+      const digitWidth = 6;
+      const totalColumns = numDigits * digitWidth + (numDigits - 1);
+      const maxStartCol = Math.max(0, totalKeys - totalColumns);
+
+      // Position for this number
+      const startKeyIdx = Math.max(0, Math.min(maxStartCol, Math.round(currentCol)));
+
+      for (let dIdx = 0; dIdx < numDigits; dIdx++) {
+        const digitChar = numStr[dIdx];
+        const matrix = font[digitChar] || font['0'];
+        const digitBaseCol = startKeyIdx + (dIdx * (digitWidth + 1));
+        const digitColor = getCharacterColor(digitChar);
+        const totalRows = matrix.length;
+        const charW = matrix[0] ? matrix[0].length : digitWidth;
+
+        for (let r = 0; r < totalRows; r++) {
+          const rowStr = matrix[r];
+          // Bottom row hits keys first, top row hits last
+          const timeOffset = currentTime + (totalRows - 1 - r) * rowDurationSec;
+
+          for (let c = 0; c < charW; c++) {
+            if (rowStr[c] === '1') {
+              const colIdx = digitBaseCol + c;
+              if (colIdx >= 0 && colIdx < totalKeys) {
+                notes.push({
+                  pitch: availableKeys[colIdx],
+                  startTime: timeOffset,
+                  duration: rowDurationSec * 1.15,
+                  velocity: 0.88,
+                  channel: dIdx % 2,
+                  char: digitChar,
+                  charColor: digitColor,
+                  color: digitColor,
+                  num: num
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // Half a character up for each step
+      currentTime += stepAdvanceSec;
+
+      // Zig-zag horizontally across the piano keys
+      if (dir === 1) {
+        if (currentCol + colStep >= maxStartCol) {
+          currentCol = maxStartCol;
+          dir = -1;
+        } else {
+          currentCol += colStep;
+        }
+      } else {
+        if (currentCol - colStep <= 0) {
+          currentCol = 0;
+          dir = 1;
+        } else {
+          currentCol -= colStep;
+        }
+      }
+    });
+
+    // Ensure notes are strictly sorted by startTime for binary search lookahead
+    notes.sort((a, b) => a.startTime - b.startTime);
 
     return notes;
   }
@@ -1835,7 +1952,8 @@ class PatternGenerator {
                 charColor: gemColor,
                 color: gemColor,
                 isGem: true,
-                isStem: isStem
+                isStem: isStem,
+                num: num
               });
             } else {
               r++;

@@ -73,6 +73,13 @@ class SongLibrary {
         getNotes: () => PatternGenerator.generatePowersOfTwo()
       },
       {
+        id: 'stepped_counting_100k',
+        title: "⚡ Staggered Zig-Zag Counting (1 to 100,000)",
+        category: 'Learning & Fun',
+        description: 'Half-step staggered diagonal zig-zag: 1-100 by 1s, 100-1K by 10s, 1K-10K by 100s, 10K-100K by 1,000s climbing right and bouncing back across the keyboard!',
+        getNotes: () => PatternGenerator.generateSteppedNumberStream()
+      },
+      {
         id: 'counter_100000',
         title: "🔢 1 to 100,000 Number Stream (10,720 Arcade)",
         category: 'Learning & Fun',
