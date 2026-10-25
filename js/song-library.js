@@ -48,6 +48,17 @@ class SongLibrary {
         }
       },
       {
+        id: 'hd_gem_123_456_789',
+        title: "💎 123 456 789 HD Gem Showcase (PianoBit)",
+        category: 'Learning & Fun',
+        description: 'Large 3D beveled gem numbers 123, 456, and 789 with full horizontal rainbow spectrum and electric keys!',
+        getNotes: () => PatternGenerator.generateHDNumbers([123, 456, 789], {
+          scale: 'whiteKeys',
+          rowDurationSec: 0.12,
+          intervalSec: 0.55
+        })
+      },
+      {
         id: 'counter_100000',
         title: "🔢 1 to 100,000 Number Stream (10,720 Arcade)",
         category: 'Learning & Fun',

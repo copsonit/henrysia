@@ -24,7 +24,7 @@ class WaterfallEngine {
     this.lastFrameTime = performance.now();
 
     // Theme & styling
-    this.theme = 'character'; // 'character', 'halloween', 'classic', 'rainbow', 'neon', 'gold'
+    this.theme = 'gemRainbow'; // 'gemRainbow', 'character', 'halloween', 'classic', 'rainbow', 'neon', 'gold'
     this.particles = [];
     this.activeNotePool = new Set();
 
@@ -138,8 +138,26 @@ class WaterfallEngine {
     this.activeNotePool.clear();
   }
 
+  getRainbowColorForX(x) {
+    const w = this.cssWidth || (this.canvas ? this.canvas.width : 800) || 800;
+    const t = Math.max(0, Math.min(1, x / w));
+    const hue = Math.round(18 + t * 267); // 18° (orange/amber) to 285° (purple/magenta)
+    return window.hslToHex ? window.hslToHex(hue, 100, 52) : `hsl(${hue}, 100%, 52%)`;
+  }
+
   getNoteColor(note) {
-    if (this.theme === 'character') {
+    if (this.theme === 'gemRainbow') {
+      if (this.piano) {
+        const key = this.piano.getKey(note.pitch);
+        if (key && (key.x !== undefined || key.width !== undefined)) {
+          return this.getRainbowColorForX(key.x + (key.width || 10) * 0.5);
+        }
+      }
+      if (note.color && note.color.startsWith('#')) return note.color;
+      const t = Math.max(0, Math.min(1, (note.pitch - 21) / 87));
+      const hue = Math.round(18 + t * 267);
+      return window.hslToHex ? window.hslToHex(hue, 100, 52) : `hsl(${hue}, 100%, 52%)`;
+    } else if (this.theme === 'character') {
       // Character Color Mode: Rainbow for 0-9 & unique color for letters A-Z
       if (note.charColor) return note.charColor;
       if (note.color) return note.color;
@@ -324,16 +342,16 @@ class WaterfallEngine {
     // 2. Draw Falling Notes & check active triggers
     this.drawNotes(hitY, dt);
 
-    // 3. Draw Laser / Hit Line Glow
+    // 3. Draw Piano Keyboard
+    this.piano.render(this.ctx, w, h, this.keyboardHeight);
+
+    // 4. Draw Laser / Electric Rainbow Hit Wave (over keys and felt)
     this.drawHitLine(w, hitY);
 
-    // 4. Update & Draw Particles
+    // 5. Update & Draw Particles (floating above keyboard)
     if (this.fidelity !== 'low') {
       this.drawParticles(dt);
     }
-
-    // 5. Draw Piano Keyboard
-    this.piano.render(this.ctx, w, h, this.keyboardHeight);
   }
 
   drawLanes(width, hitY) {
@@ -472,6 +490,100 @@ class WaterfallEngine {
     });
   }
 
+  renderGemNote(ctx, insetX, insetY, renderW, renderH, color, isStriking, note, isLow, isMed) {
+    if (isLow) {
+      ctx.fillStyle = color;
+      ctx.fillRect(insetX, insetY, renderW, renderH);
+
+      ctx.fillStyle = isStriking ? '#ffffff' : 'rgba(255, 255, 255, 0.45)';
+      ctx.fillRect(insetX + 1, insetY, Math.max(1, renderW - 2), Math.min(3, renderH * 0.35));
+
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(insetX, insetY, renderW, renderH);
+      return;
+    }
+
+    ctx.save();
+    if (isStriking) {
+      ctx.shadowColor = color;
+      ctx.shadowBlur = isMed ? 10 : 20;
+    }
+
+    const isStem = (note && note.isStem) || (renderH >= renderW * 1.8);
+
+    if (isStem) {
+      // 3D Illuminated Capsule Tube (for vertical stems like 1, 4, 9)
+      const r = Math.min(renderW * 0.45, 5);
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(insetX, insetY, renderW, renderH, r);
+      else ctx.rect(insetX, insetY, renderW, renderH);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      // Cylindrical specular tube reflection running down the length
+      const tube = ctx.createLinearGradient(insetX, insetY, insetX + renderW, insetY);
+      tube.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+      tube.addColorStop(0.28, isStriking ? 'rgba(255, 255, 255, 0.78)' : 'rgba(255, 255, 255, 0.58)');
+      tube.addColorStop(0.5, isStriking ? 'rgba(255, 255, 255, 0.90)' : 'rgba(255, 255, 255, 0.68)');
+      tube.addColorStop(0.72, 'rgba(255, 255, 255, 0.28)');
+      tube.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+      ctx.fillStyle = tube;
+      ctx.fill();
+
+      // Crisp outer border
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      if (isStriking) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(insetX + 1, insetY + renderH - 3, renderW - 2, 3);
+      }
+    } else {
+      // 3D Beveled Cushion / Pillow Gem Block (for diagonals, curves, and chords)
+      const r = Math.min(4.5, Math.min(renderW * 0.32, renderH * 0.32));
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(insetX, insetY, renderW, renderH, r);
+      else ctx.rect(insetX, insetY, renderW, renderH);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      // Inset 3D cushion bevel (top-left highlight to bottom-right shadow)
+      const bevel = ctx.createLinearGradient(insetX, insetY, insetX + renderW, insetY + renderH);
+      bevel.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+      bevel.addColorStop(0.35, 'rgba(255, 255, 255, 0.15)');
+      bevel.addColorStop(0.65, 'rgba(0, 0, 0, 0.08)');
+      bevel.addColorStop(1, 'rgba(0, 0, 0, 0.48)');
+      ctx.fillStyle = bevel;
+      ctx.fill();
+
+      // Specular gloss dome across top third
+      const glossH = Math.max(2, Math.min(renderH * 0.42, 6));
+      const glossGrad = ctx.createLinearGradient(insetX, insetY, insetX, insetY + glossH);
+      glossGrad.addColorStop(0, isStriking ? 'rgba(255, 255, 255, 0.88)' : 'rgba(255, 255, 255, 0.68)');
+      glossGrad.addColorStop(1, 'rgba(255, 255, 255, 0.08)');
+      ctx.fillStyle = glossGrad;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(insetX + 1.2, insetY + 1.2, renderW - 2.4, glossH, Math.max(1, r - 1));
+      else ctx.rect(insetX + 1.2, insetY + 1.2, renderW - 2.4, glossH);
+      ctx.fill();
+
+      // Crisp outer gem boundary
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.48)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      if (isStriking) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(insetX + 1, insetY + renderH - 2.5, renderW - 2, 2.5);
+      }
+    }
+
+    // Clean look: NO TEXT inside the gem pixels!
+    ctx.restore();
+  }
+
   renderNoteBar(ctx, x, y, width, height, color, isStriking, note) {
     const isLow = this.fidelity === 'low';
     const isMed = this.fidelity === 'medium';
@@ -480,6 +592,12 @@ class WaterfallEngine {
     const insetY = y + 0.5;
     const renderW = Math.max(3, width - 1);
     const renderH = Math.max(3, height - 1);
+
+    // Dedicated 3D Gem Shading Path (PianoBit Aesthetic)
+    if (this.theme === 'gemRainbow' || (note && note.isGem)) {
+      this.renderGemNote(ctx, insetX, insetY, renderW, renderH, color, isStriking, note, isLow, isMed);
+      return;
+    }
 
     // =========================================================================
     // LOW FIDELITY: ULTRA-FAST SOLID RETRO ARCADE BLOCK
@@ -614,16 +732,51 @@ class WaterfallEngine {
     }
 
     ctx.save();
-    const lineGrad = ctx.createLinearGradient(0, hitY - 4, 0, hitY + 2);
-    lineGrad.addColorStop(0, 'rgba(0, 229, 255, 0)');
-    lineGrad.addColorStop(0.7, 'rgba(0, 229, 255, 0.45)');
-    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0.85)');
+    if (this.theme === 'gemRainbow') {
+      // Electric Rainbow Plasma Wave (Authentic PianoBit Aesthetic)
+      const curTime = this.currentTime;
+      const waveGrad = ctx.createLinearGradient(0, 0, width, 0);
+      waveGrad.addColorStop(0, '#ff4500');   // Warm orange
+      waveGrad.addColorStop(0.2, '#ffd700'); // Gold
+      waveGrad.addColorStop(0.45, '#00e676');// Emerald
+      waveGrad.addColorStop(0.7, '#00e5ff'); // Cyan
+      waveGrad.addColorStop(0.88, '#3d5afe');// Cobalt
+      waveGrad.addColorStop(1, '#d500f9');   // Purple/magenta
 
-    ctx.fillStyle = lineGrad;
-    ctx.fillRect(0, hitY - 4, width, 5);
+      // Ambient outer colored glow
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = this.fidelity === 'high' ? 14 : 7;
+      ctx.strokeStyle = waveGrad;
+      ctx.lineWidth = 3.2;
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, hitY - 1, width, 1.5);
+      ctx.beginPath();
+      const step = 8;
+      for (let x = 0; x <= width; x += step) {
+        // Multi-frequency undulation for electric energy spark effect
+        const dy = Math.sin(x * 0.045 + curTime * 7.5) * 1.8 + Math.cos(x * 0.11 - curTime * 11) * 1.1;
+        if (x === 0) ctx.moveTo(x, hitY + dy);
+        else ctx.lineTo(x, hitY + dy);
+      }
+      ctx.stroke();
+
+      // Hot white electric plasma core
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = '#ffffff';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    } else {
+      const lineGrad = ctx.createLinearGradient(0, hitY - 4, 0, hitY + 2);
+      lineGrad.addColorStop(0, 'rgba(0, 229, 255, 0)');
+      lineGrad.addColorStop(0.7, 'rgba(0, 229, 255, 0.45)');
+      lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0.85)');
+
+      ctx.fillStyle = lineGrad;
+      ctx.fillRect(0, hitY - 4, width, 5);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, hitY - 1, width, 1.5);
+    }
     ctx.restore();
   }
 

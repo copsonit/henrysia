@@ -414,6 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let notes;
     if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
       notes = PatternGenerator.generateNumberStream({ scale });
+    } else if (/^[\d\s,]+$/.test(text)) {
+      const nums = text.split(/[\s,]+/).filter(Boolean).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+      notes = PatternGenerator.generateHDNumbers(nums.length > 0 ? nums : [123], { scale });
     } else {
       notes = PatternGenerator.generateTextNotes(text, {
         mode,
@@ -438,6 +441,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let notes;
     if (text === '1-100000' || text === '1 to 100,000' || text === '100000') {
       notes = PatternGenerator.generateNumberStream({ scale });
+    } else if (/^[\d\s,]+$/.test(text)) {
+      const nums = text.split(/[\s,]+/).filter(Boolean).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+      notes = PatternGenerator.generateHDNumbers(nums.length > 0 ? nums : [123], { scale });
     } else {
       notes = PatternGenerator.generateTextNotes(text, {
         mode,
@@ -634,7 +640,8 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(renderLoop);
   }
 
-  // Initial song load: Henry's Grand Showcase!
-  loadSongById('henry_name');
+  // Initial song load: 💎 123 456 789 HD Gem Showcase (PianoBit Aesthetic)
+  songSelect.value = 'hd_gem_123_456_789';
+  loadSongById('hd_gem_123_456_789');
   requestAnimationFrame(renderLoop);
 });

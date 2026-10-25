@@ -152,7 +152,8 @@
 
       <!-- Theme Selector -->
       <select id="themeSelect" class="select-control" title="Visual Colors">
-        <option value="character" selected>🌈 Character Colors</option>
+        <option value="gemRainbow" selected>💎 3D Gem Rainbow</option>
+        <option value="character">🌈 Character Colors</option>
         <option value="halloween">🎃 Spooky Halloween</option>
         <option value="classic">Classic Emerald</option>
         <option value="rainbow">Rainbow Spectrum</option>
@@ -208,6 +209,7 @@
         <label>Message or Numbers</label>
         <textarea id="customTextInput" class="form-input" rows="2" maxlength="50" placeholder="e.g. HAPPY BIRTHDAY or enter words on multiple lines" style="resize: vertical; min-height: 54px;">HAPPY BIRTHDAY</textarea>
         <div class="quick-tags">
+          <button class="tag-btn" onclick="document.getElementById('customTextInput').value='123 456 789'">123 456 789 (HD Gems)</button>
           <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY\nBIRTHDAY'">HAPPY BIRTHDAY (2 Lines)</button>
           <button class="tag-btn" onclick="document.getElementById('customTextInput').value='HAPPY BIRTHDAY'">HAPPY BIRTHDAY (1 Line)</button>
           <button class="tag-btn" onclick="document.getElementById('customTextInput').value='10720'">10720 (Arcade)</button>
@@ -272,7 +274,8 @@
       <div class="form-group">
         <label>🎨 Visual Waterfall Theme</label>
         <select id="modalThemeSelect" class="select-control">
-          <option value="character" selected>🌈 Character Colors (Retro Rainbow)</option>
+          <option value="gemRainbow" selected>💎 3D Gem Rainbow (PianoBit)</option>
+          <option value="character">🌈 Character Colors (Retro Rainbow)</option>
           <option value="halloween">🎃 Spooky Halloween</option>
           <option value="classic">Classic Emerald & Sapphire</option>
           <option value="rainbow">Rainbow Spectrum</option>
@@ -355,13 +358,13 @@
   </div>
 
   <!-- Core JavaScript Libraries -->
-  <script src="js/audio.js?v=5"></script>
-  <script src="js/piano.js?v=5"></script>
-  <script src="js/waterfall.js?v=5"></script>
-  <script src="js/font-patterns.js?v=5"></script>
-  <script src="js/midi-parser.js?v=5"></script>
-  <script src="js/midi-writer.js?v=5"></script>
-  <script src="js/song-library.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/audio.js?v=6"></script>
+  <script src="js/piano.js?v=6"></script>
+  <script src="js/waterfall.js?v=6"></script>
+  <script src="js/font-patterns.js?v=6"></script>
+  <script src="js/midi-parser.js?v=6"></script>
+  <script src="js/midi-writer.js?v=6"></script>
+  <script src="js/song-library.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

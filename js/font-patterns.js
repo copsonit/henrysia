@@ -1761,11 +1761,357 @@ class PatternGenerator {
 
     return notes;
   }
+
+  /**
+   * Generates large 3D beveled gem numbers (1-1000) matching the YouTube video (PianoBit)
+   * with tall 21-row HD fonts, sustained vertical stems, square cushion gems,
+   * and a seamless left-to-right rainbow spectrum!
+   */
+  static generateHDNumbers(numbers = [123, 456, 789], options = {}) {
+    const font = FONT_HD_GEMS;
+    const scale = options.scale || 'whiteKeys';
+    const availableKeys = PatternGenerator.getKeysForScale(scale);
+    const totalKeys = availableKeys.length;
+    const rowDurationSec = options.rowDurationSec || 0.12;
+    const intervalSec = options.intervalSec || 0.55;
+    const notes = [];
+    let currentTime = options.startTime || 0.6;
+
+    const toHex = window.hslToHex || ((h, s, l) => `hsl(${h}, ${s}%, ${l}%)`);
+
+    numbers.forEach((num, seqIdx) => {
+      const numStr = num.toString();
+      const numDigits = numStr.length;
+      const digitWidth = 11;
+      let gap = 4;
+      if (numDigits === 4) gap = 1;
+      else if (numDigits === 2) gap = 6;
+      else if (numDigits === 1) gap = 0;
+
+      const totalColumns = numDigits * digitWidth + (numDigits - 1) * gap;
+      const centerKeyIdx = Math.floor(totalKeys / 2);
+      const startKeyIdx = Math.max(0, centerKeyIdx - Math.floor(totalColumns / 2));
+
+      for (let dIdx = 0; dIdx < numDigits; dIdx++) {
+        const digitChar = numStr[dIdx];
+        const matrix = font[digitChar] || font['0'];
+        const digitBaseCol = startKeyIdx + dIdx * (digitWidth + gap);
+        const totalRows = matrix.length;
+        const charW = matrix[0] ? matrix[0].length : digitWidth;
+
+        // Scan columns to find consecutive runs of '1's
+        // Vertical runs (>= 2 rows) are merged into continuous sustained 3D gem capsule stems!
+        for (let c = 0; c < charW; c++) {
+          const colIdx = digitBaseCol + c;
+          if (colIdx < 0 || colIdx >= totalKeys) continue;
+          const pitch = availableKeys[colIdx];
+
+          // Seamless left-to-right rainbow hue: 18° (orange/amber) to 285° (purple/magenta)
+          const colRatio = colIdx / Math.max(1, totalKeys - 1);
+          const hue = Math.round(18 + colRatio * 267);
+          const gemColor = toHex(hue, 100, 52);
+
+          let r = 0;
+          while (r < totalRows) {
+            if (matrix[r][c] === '1') {
+              const startR = r;
+              while (r < totalRows && matrix[r][c] === '1') {
+                r++;
+              }
+              const runLength = r - startR;
+              // Matrix row totalRows - 1 is the bottom of the digit (hits keys first)
+              const earliestRow = r - 1;
+              const timeOffset = currentTime + (totalRows - 1 - earliestRow) * rowDurationSec;
+              const isStem = runLength >= 2;
+              const duration = isStem ? (runLength * rowDurationSec) : (rowDurationSec * 1.05);
+
+              notes.push({
+                pitch: pitch,
+                startTime: timeOffset,
+                duration: duration,
+                velocity: 0.88,
+                channel: dIdx % 2,
+                char: digitChar,
+                charColor: gemColor,
+                color: gemColor,
+                isGem: true,
+                isStem: isStem
+              });
+            } else {
+              r++;
+            }
+          }
+        }
+      }
+
+      const totalNumHeightSec = 21 * rowDurationSec;
+      currentTime += totalNumHeightSec + intervalSec;
+    });
+
+    return notes;
+  }
 }
+
+// ============================================================================
+// HD 21-ROW GEM NUMBER FONT MATRIX (Authentic PianoBit YouTube Aesthetic)
+// Large, high-definition curved digits spanning 21 rows by 11 columns
+// ============================================================================
+const FONT_HD_GEMS = {
+  // Digit 1 (matches Image 1: diagonal top hook, tall continuous stem at col 7, wide 11-gem base at row 20)
+  '1': [
+    "       1   ",
+    "      11   ",
+    "     1 1   ",
+    "    1  1   ",
+    "   1   1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "       1   ",
+    "11111111111"
+  ],
+
+  // Digit 2 (matches Image 1: rounded top arch, smooth diagonal staircase, flat base)
+  '2': [
+    "   11111   ",
+    "  1     1  ",
+    " 1       1 ",
+    "1         1",
+    "          1",
+    "          1",
+    "         1 ",
+    "        1  ",
+    "       1   ",
+    "      1    ",
+    "     1     ",
+    "    1      ",
+    "   1       ",
+    "  1        ",
+    " 1         ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "11111111111",
+    "11111111111"
+  ],
+
+  // Digit 3 (matches Image 1: flat top, upper curve, central horizontal cusp, lower sweeping curve)
+  '3': [
+    " 111111111 ",
+    "1         1",
+    "          1",
+    "          1",
+    "          1",
+    "         1 ",
+    "       11  ",
+    "    111    ",
+    "       11  ",
+    "         1 ",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "         1 ",
+    "        1  ",
+    "1      1   ",
+    " 111111    ",
+    "           "
+  ],
+
+  // Digit 4 (matches Image 2: tall vertical stem at col 9, diagonal from top-left, horizontal crossbar)
+  '4': [
+    "         1 ",
+    "        11 ",
+    "       1 1 ",
+    "      1  1 ",
+    "     1   1 ",
+    "    1    1 ",
+    "   1     1 ",
+    "  1      1 ",
+    " 1       1 ",
+    "1        1 ",
+    "1        1 ",
+    "1        1 ",
+    "1        1 ",
+    "11111111111",
+    "11111111111",
+    "         1 ",
+    "         1 ",
+    "         1 ",
+    "         1 ",
+    "         1 ",
+    "         1 "
+  ],
+
+  // Digit 5 (matches Image 2: top bar, left stem, middle bar, lower loop)
+  '5': [
+    "1111111111 ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "11111111   ",
+    "        11 ",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "         1 ",
+    "        1  ",
+    "1      1   ",
+    " 111111    ",
+    "           ",
+    "           "
+  ],
+
+  // Digit 6 (matches Image 2: top arch from right, left stem, closed bottom loop)
+  '6': [
+    "    11111  ",
+    "   1     1 ",
+    "  1        ",
+    " 1         ",
+    "1          ",
+    "1          ",
+    "1          ",
+    "1  11111   ",
+    "1 1     1  ",
+    "11       1 ",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    " 1       1 ",
+    "  1     1  ",
+    "   11111   ",
+    "           ",
+    "           "
+  ],
+
+  // Digit 7 (matches Image 3: top horizontal bar with left ear, diagonal sweep down)
+  '7': [
+    "11111111111",
+    "1         1",
+    "1        1 ",
+    "        1  ",
+    "       1   ",
+    "       1   ",
+    "      1    ",
+    "      1    ",
+    "     1     ",
+    "     1     ",
+    "    1      ",
+    "    1      ",
+    "   1       ",
+    "   1       ",
+    "  1        ",
+    "  1        ",
+    " 1         ",
+    " 1         ",
+    "1          ",
+    "1          ",
+    "1          "
+  ],
+
+  // Digit 8 (matches Image 3: smaller upper loop, slightly wider lower loop)
+  '8': [
+    "   11111   ",
+    "  1     1  ",
+    " 1       1 ",
+    " 1       1 ",
+    " 1       1 ",
+    " 1       1 ",
+    "  1     1  ",
+    "   11111   ",
+    "  1     1  ",
+    " 1       1 ",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    " 1       1 ",
+    "  1     1  ",
+    "   11111   ",
+    "           ",
+    "           "
+  ],
+
+  // Digit 9 (matches Image 3: closed upper loop, right stem, bottom hook curving left)
+  '9': [
+    "   11111   ",
+    "  1     1  ",
+    " 1       1 ",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    " 1       11",
+    "  1     1 1",
+    "   11111  1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "          1",
+    "         1 ",
+    "        1  ",
+    "  111111   ",
+    " 1         ",
+    "           "
+  ],
+
+  // Digit 0 (tall rounded oval)
+  '0': [
+    "   11111   ",
+    "  1     1  ",
+    " 1       1 ",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    "1         1",
+    " 1       1 ",
+    "  1     1  ",
+    "   11111   ",
+    "           ",
+    "           "
+  ]
+};
 
 window.PatternGenerator = PatternGenerator;
 window.FONT_SPECTRUM_8X8 = FONT_SPECTRUM_8X8;
 window.FONT_5X7 = FONT_5X7;
+window.FONT_HD_GEMS = FONT_HD_GEMS;
 window.DIGIT_COLORS = DIGIT_COLORS;
 window.LETTER_COLORS = LETTER_COLORS;
 window.WHITE_KEYS_88 = WHITE_KEYS_88;
