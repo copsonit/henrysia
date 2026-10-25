@@ -14,9 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const waterfall = new WaterfallEngine(canvas, piano);
   const audio = window.PianoAudio;
 
-  // Sound triggers from waterfall hitting piano keys
-  waterfall.onNoteTrigger = (pitch, velocity) => {
-    audio.playNote(pitch, velocity);
+  // Sound triggers from waterfall hitting piano keys (harmonized when in harmonicChords mode)
+  waterfall.onNoteTrigger = (pitch, velocity, note) => {
+    const scaleMode = scaleSelect ? scaleSelect.value : 'harmonicChords';
+    if (scaleMode === 'harmonicChords' && window.HarmonicEngine) {
+      const res = window.HarmonicEngine.filterNote(pitch, velocity, waterfall.currentTime, audio);
+      if (res.play) {
+        audio.playNote(pitch, res.velocity);
+      }
+    } else {
+      audio.playNote(pitch, velocity);
+    }
   };
   waterfall.onNoteRelease = (pitch) => {
     audio.stopNote(pitch);
@@ -160,12 +168,14 @@ document.addEventListener('DOMContentLoaded', () => {
   rewindBtn.addEventListener('click', () => {
     audio.ensureContext();
     waterfall.setTime(0);
+    if (window.HarmonicEngine) window.HarmonicEngine.reset();
     updateTimelineUI();
   });
 
   timelineSlider.addEventListener('input', (e) => {
     const t = parseFloat(e.target.value);
     waterfall.setTime(t);
+    if (window.HarmonicEngine) window.HarmonicEngine.reset();
     timeCurrentEl.textContent = formatTime(t);
   });
 
@@ -182,17 +192,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const clamped = Math.max(1, Math.min(1000, val));
       const targetTime = Math.max(0, 0.6 + (clamped - 1) * 2.29);
       waterfall.setTime(targetTime);
+      if (window.HarmonicEngine) window.HarmonicEngine.reset();
       updateTimelineUI();
     } else if (currentSongId === 'powers_of_two') {
       const targetNote = currentNotes.find(n => n.val === val || (n.exp !== undefined && n.exp === val));
       if (targetNote) {
         waterfall.setTime(Math.max(0, targetNote.startTime - 0.2));
+        if (window.HarmonicEngine) window.HarmonicEngine.reset();
         updateTimelineUI();
       }
     } else {
       const targetNote = currentNotes.find(n => n.num === val || n.val === val || (n.char && parseInt(n.char, 10) === val));
       if (targetNote) {
         waterfall.setTime(Math.max(0, targetNote.startTime - 0.2));
+        if (window.HarmonicEngine) window.HarmonicEngine.reset();
         updateTimelineUI();
       }
     }
@@ -239,6 +252,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const val = e.target.value;
       if (modalScaleSelect) modalScaleSelect.value = val;
       if (customScaleSelect) customScaleSelect.value = val;
+      if (window.HarmonicEngine) {
+        window.HarmonicEngine.setEnabled(val === 'harmonicChords');
+      }
     });
   }
 
@@ -324,6 +340,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const val = e.target.value;
       if (scaleSelect) scaleSelect.value = val;
       if (customScaleSelect) customScaleSelect.value = val;
+      if (window.HarmonicEngine) {
+        window.HarmonicEngine.setEnabled(val === 'harmonicChords');
+      }
     });
   }
   if (customScaleSelect) {
@@ -331,6 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const val = e.target.value;
       if (scaleSelect) scaleSelect.value = val;
       if (modalScaleSelect) modalScaleSelect.value = val;
+      if (window.HarmonicEngine) {
+        window.HarmonicEngine.setEnabled(val === 'harmonicChords');
+      }
     });
   }
   if (modalSpeedSelect) {
@@ -373,8 +395,13 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('No notes available to export!');
       return;
     }
+    const scaleMode = scaleSelect ? scaleSelect.value : 'harmonicChords';
+    const notesToExport = (scaleMode === 'harmonicChords' && window.HarmonicEngine)
+      ? window.HarmonicEngine.filterNotesArray(currentNotes)
+      : currentNotes;
+
     const cleanName = currentSongTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.mid';
-    MidiWriter.downloadMidi(currentNotes, cleanName, {
+    MidiWriter.downloadMidi(notesToExport, cleanName, {
       name: currentSongTitle
     });
   });

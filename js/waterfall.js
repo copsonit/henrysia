@@ -449,7 +449,7 @@ class WaterfallEngine {
         // Trigger note audio & particles
         if (!this.activeNotePool.has(note)) {
           this.activeNotePool.add(note);
-          if (this.onNoteTrigger) this.onNoteTrigger(note.pitch, note.velocity);
+          if (this.onNoteTrigger) this.onNoteTrigger(note.pitch, note.velocity, note);
           this.spawnHitParticles(key.x, hitY, key.width, note.color);
         } else {
           this.spawnSustainedSparkles(key.x, hitY, key.width, note.color);

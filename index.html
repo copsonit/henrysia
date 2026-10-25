@@ -140,7 +140,8 @@
 
       <!-- Musical Scale & Key Mode Selector -->
       <select id="scaleSelect" class="select-control highlight-control" title="Musical Scale & Key Mode">
-        <option value="whiteKeys" selected>🎹 C Major (White Keys)</option>
+        <option value="harmonicChords" selected>🎶 Harmonious Chords (Sweet Harmony — Default)</option>
+        <option value="whiteKeys">🎹 C Major (All White Keys — Raw)</option>
         <option value="chromatic">All Keys (Chromatic)</option>
         <option value="pentatonic">Pentatonic Bells</option>
         <option value="chime">Glass Chimes</option>
@@ -238,12 +239,13 @@
       <div class="form-group">
         <label>Musical Scale & Keys</label>
         <select id="customScaleSelect" class="select-control">
-          <option value="whiteKeys" selected>🎹 C Major (White Keys Only — Harmonious & Joyful)</option>
+          <option value="harmonicChords" selected>🎶 Harmonious Chords (Sweet & Calm — Default)</option>
+          <option value="whiteKeys">🎹 C Major (White Keys Only — Raw)</option>
           <option value="chromatic">All Keys (Chromatic 88)</option>
           <option value="pentatonic">Celestial Pentatonic Bells</option>
           <option value="chime">Arpeggiated Glass Chimes</option>
         </select>
-        <div class="field-hint">C Major (White Keys Only) maps all visual notes exclusively to the 52 white keys.</div>
+        <div class="field-hint">Harmonious Chords mutes harsh tone clusters and plays soothing chords with deep phantom bass.</div>
       </div>
 
       <div class="modal-actions">
@@ -324,12 +326,13 @@
       <div class="form-group">
         <label>🎹 Musical Scale & Key Mode</label>
         <select id="modalScaleSelect" class="select-control">
-          <option value="whiteKeys" selected>🎹 C Major (White Keys Only — Harmonious)</option>
+          <option value="harmonicChords" selected>🎶 Harmonious Chords (Sweet & Calm — Default)</option>
+          <option value="whiteKeys">🎹 C Major (White Keys Only — Raw)</option>
           <option value="chromatic">All Keys (Chromatic 88)</option>
           <option value="pentatonic">Celestial Pentatonic Bells</option>
           <option value="chime">Glass Chimes</option>
         </select>
-        <div class="field-hint">C Major (White Keys Only) plays pure natural notes on the 52 white keys.</div>
+        <div class="field-hint">Harmonious Chords mutes harsh clusters and plays serene chords with phantom bass roots.</div>
       </div>
 
       <div class="form-group">
@@ -365,13 +368,14 @@
   </div>
 
   <!-- Core JavaScript Libraries -->
-  <script src="js/audio.js?v=10"></script>
-  <script src="js/piano.js?v=10"></script>
-  <script src="js/waterfall.js?v=10"></script>
-  <script src="js/font-patterns.js?v=10"></script>
-  <script src="js/midi-parser.js?v=10"></script>
-  <script src="js/midi-writer.js?v=10"></script>
-  <script src="js/song-library.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <script src="js/audio.js?v=11"></script>
+  <script src="js/harmonic-engine.js?v=11"></script>
+  <script src="js/piano.js?v=11"></script>
+  <script src="js/waterfall.js?v=11"></script>
+  <script src="js/font-patterns.js?v=11"></script>
+  <script src="js/midi-parser.js?v=11"></script>
+  <script src="js/midi-writer.js?v=11"></script>
+  <script src="js/song-library.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>

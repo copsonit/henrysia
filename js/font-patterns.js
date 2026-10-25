@@ -1347,6 +1347,7 @@ const CHIMES_88 = [
 ];
 
 const SCALES = {
+  harmonicChords: WHITE_KEYS_88,
   whiteKeys: WHITE_KEYS_88,
   major: WHITE_KEYS_88,
   cMajor: WHITE_KEYS_88,
@@ -1366,7 +1367,7 @@ class PatternGenerator {
     return FONT_SPECTRUM_8X8;
   }
 
-  static getKeysForScale(scale = 'whiteKeys') {
+  static getKeysForScale(scale = 'harmonicChords') {
     if (SCALES[scale]) return SCALES[scale];
     if (scale === 'allKeys' || scale === 'chromatic') return CHROMATIC_88;
     return WHITE_KEYS_88;
